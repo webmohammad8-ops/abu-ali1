@@ -847,4 +847,111 @@ if (!date) {
 
 window.printProjectReport(project, workers, entries, payments)
   }
+
+  // ---------- مشاركة حسابات المشروع عبر واتساب ----------
+
+  Actions.shareProjectWhatsApp = (el) => {
+    const data = Store.get()
+
+    const project = data.projects.find(
+      (p) => p.id === el.dataset.id
+    )
+
+    if (!project) {
+      return UI.toast('لم يتم العثور على المشروع', 'err')
+    }
+
+    const workers = data.workers.filter(
+      (w) => w.project_id === project.id
+    )
+
+    const workerIds = new Set(workers.map((w) => w.id))
+
+    const entries = data.entries.filter(
+      (e) => workerIds.has(e.worker_id)
+    )
+
+    const payments = (data.payments || []).filter(
+      (p) => p.project_id === project.id
+    )
+
+    const sum = (list, key) =>
+      list.reduce(
+        (total, item) => total + Calc.toNum(item[key]),
+        0
+      )
+
+    let totalWage = 0
+    let totalFood = 0
+    let totalSmoke = 0
+    let totalAdvance = 0
+    let totalNet = 0
+
+    const workerDetails = workers.map((worker, index) => {
+      const records = entries.filter(
+        (e) => e.worker_id === worker.id
+      )
+
+      const wage = sum(records, 'daily_wage')
+      const food = sum(records, 'food')
+      const smoke = sum(records, 'smoke')
+      const advance = sum(records, 'advance')
+      const net = wage - food - smoke - advance
+
+      totalWage += wage
+      totalFood += food
+      totalSmoke += smoke
+      totalAdvance += advance
+      totalNet += net
+
+      return (
+        `${index + 1}. ${worker.name}\n` +
+        `   أيام العمل: ${records.length}\n` +
+        `   اليومية: ${Calc.fmt(wage)} ₪\n` +
+        `   الأكل: ${Calc.fmt(food)} ₪\n` +
+        `   الدخان: ${Calc.fmt(smoke)} ₪\n` +
+        `   السلف: ${Calc.fmt(advance)} ₪\n` +
+        `   الصافي: ${Calc.fmt(net)} ₪`
+      )
+    })
+
+    const totalPayments = sum(payments, 'amount')
+
+    const message = [
+      '📊 تقرير حسابات المشروع',
+      '━━━━━━━━━━━━━━',
+      `🏗️ المشروع: ${project.name}`,
+      project.location ? `📍 الموقع: ${project.location}` : '',
+      `📅 تاريخ التقرير: ${Calc.showDate(Calc.todayStr())}`,
+      '',
+      '👷 حسابات العمال',
+      '━━━━━━━━━━━━━━',
+      `عدد العمال: ${workers.length}`,
+      '',
+      workerDetails.length
+        ? workerDetails.join('\n\n')
+        : 'لا يوجد عمال مسجلون',
+      '',
+      '📋 الإجماليات',
+      '━━━━━━━━━━━━━━',
+      `إجمالي اليوميات: ${Calc.fmt(totalWage)} ₪`,
+      `إجمالي الأكل: ${Calc.fmt(totalFood)} ₪`,
+      `إجمالي الدخان: ${Calc.fmt(totalSmoke)} ₪`,
+      `إجمالي السلف: ${Calc.fmt(totalAdvance)} ₪`,
+      `صافي مستحقات العمال: ${Calc.fmt(totalNet)} ₪`,
+      '',
+      '💰 استلامات الشركة',
+      '━━━━━━━━━━━━━━',
+      `عدد الاستلامات: ${payments.length}`,
+      `إجمالي الاستلامات: ${Calc.fmt(totalPayments)} ₪`,
+      '',
+      '━━━━━━━━━━━━━━',
+      'تم إنشاء التقرير بواسطة نظام المقاول أبو علي'
+    ].filter(Boolean).join('\n')
+
+    const url =
+      'https://wa.me/?text=' + encodeURIComponent(message)
+
+    window.open(url, '_blank')
+  }
 })()
