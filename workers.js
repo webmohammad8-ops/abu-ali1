@@ -280,6 +280,148 @@ const WorkersTab = (() => {
       }
     `
   }
+  // نموذج إضافة مجموعة عمال
+function groupForm() {
+  const radios = [
+    ...GROUPS.map((g) => ({ value: g, label: g })),
+    { value: '__other__', label: 'أخرى' }
+  ].map((item) => `
+    <label class="block">
+      <input type="radio"
+        name="wkg-group"
+        value="${esc(item.value)}"
+        class="peer sr-only"
+        onchange="document.getElementById('wkg-custom-wrap').classList.toggle('hidden', this.value !== '__other__')"
+        ${item.value === 'عامل' ? 'checked' : ''}>
+
+      <span class="flex min-h-[46px] cursor-pointer items-center justify-center rounded-xl border border-gray-300 bg-white text-sm font-bold peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">
+        ${esc(item.label)}
+      </span>
+    </label>
+  `).join('')
+
+  return `
+    ${field(
+      'أسماء العمال (كل اسم في سطر)',
+      `<textarea id="wkg-names"
+        class="${inputCls}"
+        rows="6"
+        placeholder="محمد أحمد&#10;أحمد محمود&#10;خالد علي"></textarea>`
+    )}
+
+    <div class="mb-3">
+      <span class="mb-2 block text-sm font-bold text-gray-700">المهنة</span>
+      <div class="grid grid-cols-2 gap-2">${radios}</div>
+    </div>
+
+    <div id="wkg-custom-wrap" class="hidden mb-3">
+      ${field(
+        'اسم المهنة',
+        `<input id="wkg-custom-job"
+          class="${inputCls}"
+          placeholder="مثال: كهربجي أو سباك">`
+      )}
+    </div>
+
+    ${field(
+      'اليومية الموحدة لجميع العمال (₪)',
+      `<input id="wkg-wage"
+        type="number"
+        min="0"
+        step="0.01"
+        inputmode="decimal"
+        class="${inputCls}"
+        placeholder="مثال: 100">`
+    )}
+
+    <p class="mb-3 text-xs text-gray-500">
+      سيتم إضافة جميع العمال بنفس المهنة واليومية المحددة.
+    </p>
+
+    <div class="flex gap-2">
+      ${btn('حفظ مجموعة العمال', {
+        a: 'saveWorkerGroup',
+        cls: 'flex-1',
+      })}
+
+      ${btn('إلغاء', {
+        a: 'modal-close',
+        v: 'secondary',
+        cls: 'flex-1',
+      })}
+    </div>
+  `
+}
+
+// فتح نموذج المجموعة
+Actions.addWorkerGroup = () => {
+  UI.openModal(
+    'إضافة مجموعة عمال',
+    groupForm(),
+    () => UI.$('wkg-names').focus()
+  )
+}
+
+// حفظ جميع العمال دفعة واحدة
+Actions.saveWorkerGroup = (el) => {
+  const names = UI.val('wkg-names')
+    .split('\n')
+    .map((name) => name.trim())
+    .filter(Boolean)
+
+  if (!names.length) {
+    return UI.toast('اكتب أسماء العمال أولاً', 'err')
+  }
+
+  const selected = document.querySelector(
+    'input[name="wkg-group"]:checked'
+  )
+
+  if (!selected) {
+    return UI.toast('اختر المهنة', 'err')
+  }
+
+  const isCustom = selected.value === '__other__'
+
+  const customJob = isCustom
+    ? UI.val('wkg-custom-job').trim()
+    : ''
+
+  if (isCustom && !customJob) {
+    return UI.toast('اكتب اسم المهنة', 'err')
+  }
+
+  const wage = UI.val('wkg-wage').trim()
+
+  if (wage === '' || !Number.isFinite(Number(wage)) || Number(wage) < 0) {
+    return UI.toast('اكتب اليومية الموحدة بشكل صحيح', 'err')
+  }
+
+  const groupType = isCustom ? customJob : selected.value
+
+  const rows = names.map((name) => ({
+    name,
+    sukneh_number: null,
+    group_type: groupType,
+    daily_wage: toNum(wage),
+    project_id: App.parseRoute().pid,
+  }))
+
+  if (!window.confirm(
+    `سيتم إضافة ${rows.length} عامل بمهنة «${groupType}» ويومية ${fmt(toNum(wage))} ₪ لكل عامل.\nهل تريد المتابعة؟`
+  )) return
+
+  UI.busy(el, async () => {
+    try {
+      await Store.addWorkers(rows)
+
+      UI.closeModal()
+      UI.toast(`تمت إضافة ${rows.length} عامل بنجاح ✓`)
+    } catch (e) {
+      UI.toast(e.message || 'تعذرت إضافة مجموعة العمال', 'err')
+    }
+  })
+}
 
   // تصفية العمال حسب المجموعة
   Actions.workerFilter = (el) => {
