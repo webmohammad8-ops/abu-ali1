@@ -832,6 +832,10 @@ if (!date) {
       (e) => workerIds.has(e.worker_id)
     )
 
-    window.printProjectReport(project, workers, entries)
+    const payments = data.payments.filter(
+  (p) => p.project_id === project.id
+)
+
+window.printProjectReport(project, workers, entries, payments)
   }
 })()
