@@ -129,7 +129,7 @@ const groupBtns = groups.map((g) => {
     }
 
     return `<h2 class="mb-3 text-lg font-extrabold">توزيع دفعة على مجموعة</h2>
-      ${step(1, 'اختر المجموعة', `<div class="grid grid-cols-4 gap-2">${groupBtns}</div>`)}${rest}`
+      ${step(1, 'اختر المجموعة', `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">${groupBtns}</div>`)}${rest}`
   }
 
   // تحديث الأرقام فقط أثناء الكتابة (بدون إعادة رسم الصفحة كي لا يختفي مؤشر الكتابة/لوحة المفاتيح)
