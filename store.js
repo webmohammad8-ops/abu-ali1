@@ -8,6 +8,7 @@ const Store = (() => {
     entries: 'daily_entries',
     invoices: 'invoices',
     rates: 'worker_rates',
+    payments: 'contractor_payments',
   }
 
   const state = {
@@ -16,6 +17,7 @@ const Store = (() => {
     entries: [],
     invoices: [],
     rates: [],
+    payments: [],
     loading: true,
     error: null,
     live: false,
@@ -39,42 +41,43 @@ const Store = (() => {
   const remove = (list, id) => list.filter((x) => x.id !== id)
 
   // Supabase يرجّع 1000 صف كحد أقصى لكل طلب، لذلك نقرأ على دفعات
+  async function fetchAll(table) {
+    const out = []
 
-async function fetchAll(table) {
-  const out = []
+    for (let from = 0; ; from += 1000) {
+      let query = sb.from(table).select('*')
 
-  for (let from = 0; ; from += 1000) {
-    let query = sb.from(table).select('*')
+      if (table === TABLES.rates) {
+        query = query.order('group_type', { ascending: true })
+      } else {
+        query = query
+          .order('created_at', { ascending: true })
+          .order('id', { ascending: true })
+      }
 
-    if (table === TABLES.rates) {
-      query = query.order('group_type', { ascending: true })
-    } else {
-      query = query
-        .order('created_at', { ascending: true })
-        .order('id', { ascending: true })
+      const { data, error } = await query.range(from, from + 999)
+
+      if (error) throw error
+
+      out.push(...data)
+
+      if (data.length < 1000) break
     }
 
-    const { data, error } = await query.range(from, from + 999)
-
-    if (error) throw error
-
-    out.push(...data)
-
-    if (data.length < 1000) break
+    return out
   }
-
-  return out
-}
 
   async function load() {
     try {
-      const [projects, workers, entries, invoices, rates] = await Promise.all([
-        fetchAll(TABLES.projects),
-        fetchAll(TABLES.workers),
-        fetchAll(TABLES.entries),
-        fetchAll(TABLES.invoices),
-        fetchAll(TABLES.rates),
-      ])
+      const [projects, workers, entries, invoices, rates, payments] =
+        await Promise.all([
+          fetchAll(TABLES.projects),
+          fetchAll(TABLES.workers),
+          fetchAll(TABLES.entries),
+          fetchAll(TABLES.invoices),
+          fetchAll(TABLES.rates),
+          fetchAll(TABLES.payments),
+        ])
 
       set({
         projects,
@@ -82,6 +85,7 @@ async function fetchAll(table) {
         entries,
         invoices,
         rates,
+        payments,
         error: null,
         loading: false,
       })
@@ -95,10 +99,9 @@ async function fetchAll(table) {
   function applyEvent(key, payload) {
     if (payload.eventType === 'DELETE') {
       const id = payload.old && payload.old.id
+
       if (id) {
-        const field = key === 'rates'
-          ? 'group_type'
-          : 'id'
+        const field = key === 'rates' ? 'group_type' : 'id'
 
         set({
           [key]: state[key].filter((x) => x[field] !== id),
@@ -108,7 +111,9 @@ async function fetchAll(table) {
       const row = payload.new
 
       if (key === 'rates') {
-        const list = state.rates.filter((x) => x.group_type !== row.group_type)
+        const list = state.rates.filter(
+          (x) => x.group_type !== row.group_type
+        )
         set({ rates: [...list, row] })
       } else {
         set({ [key]: upsert(state[key], row) })
@@ -227,7 +232,9 @@ async function fetchAll(table) {
 
     if (error) throw error
 
-    const rates = state.rates.filter((r) => r.group_type !== groupType)
+    const rates = state.rates.filter(
+      (r) => r.group_type !== groupType
+    )
     set({ rates: [...rates, data] })
 
     return data
@@ -285,6 +292,7 @@ async function fetchAll(table) {
         workers: state.workers.filter((w) => w.project_id !== id),
         entries: state.entries.filter((e) => !wIds.has(e.worker_id)),
         invoices: state.invoices.filter((i) => i.project_id !== id),
+        payments: state.payments.filter((p) => p.project_id !== id),
       })
     },
 
@@ -310,5 +318,10 @@ async function fetchAll(table) {
       const p = pathFromUrl(inv.image_url)
       if (p) sb.storage.from(BUCKET).remove([p]).catch(() => {})
     },
+
+    // ---------- استلامات الشركة ----------
+    addPayment: (row) => insertOne('payments', row),
+    updatePayment: (id, patch) => updateOne('payments', id, patch),
+    deletePayment: (id) => deleteOne('payments', id),
   }
 })()
