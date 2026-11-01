@@ -127,7 +127,7 @@ const InvoicesTab = (() => {
 
   Actions.invGal = () => UI.$('inv-gal').click()
 
-  // تصغير صورة الجوال قبل الرفع (صور الكاميرا تكون 4–10MB)
+  // تصغير صورة الجوال قبل الرفع
   function compress(f, maxSide = 1600, quality = 0.8) {
     return new Promise((resolve) => {
       const url = URL.createObjectURL(f)
@@ -205,6 +205,7 @@ const InvoicesTab = (() => {
     })
   }
 
+  // عرض الفاتورة
   Actions.viewInvoice = (el) => {
     const i = Store.get().invoices.find((x) => x.id === el.dataset.id)
 
@@ -215,10 +216,17 @@ const InvoicesTab = (() => {
 
       ${i.notes ? `<p class="mb-3 text-gray-700">${esc(i.notes)}</p>` : ''}
 
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2">
         ${i.image_url
           ? `<a href="${esc(i.image_url)}" target="_blank" rel="noreferrer" class="flex-1">${btn('فتح الصورة', { v: 'secondary', cls: 'w-full' })}</a>`
           : ''}
+
+        ${btn('✏️ تعديل الملاحظات', {
+          a: 'editInvoiceNotes',
+          id: i.id,
+          v: 'secondary',
+          cls: 'flex-1'
+        })}
 
         ${btn('🗑 حذف', {
           a: 'deleteInvoice',
@@ -230,6 +238,68 @@ const InvoicesTab = (() => {
     `)
   }
 
+  // فتح نافذة تعديل الملاحظات
+  Actions.editInvoiceNotes = (el) => {
+    const invoice = Store.get().invoices.find(
+      (i) => String(i.id) === String(el.dataset.id)
+    )
+
+    if (!invoice) {
+      return UI.toast('لم يتم العثور على الفاتورة', 'err')
+    }
+
+    UI.openModal('✏️ تعديل ملاحظات الفاتورة', `
+      ${field('الملاحظات', `
+        <textarea
+          id="invoice-edit-notes"
+          class="${inputCls}"
+          rows="4"
+          placeholder="اكتب ملاحظات الفاتورة هنا">${esc(invoice.notes || '')}</textarea>
+      `)}
+
+      <div class="flex gap-2">
+        ${btn('💾 حفظ الملاحظات', {
+          a: 'saveInvoiceNotes',
+          id: invoice.id,
+          cls: 'flex-1'
+        })}
+
+        ${btn('إلغاء', {
+          a: 'viewInvoice',
+          id: invoice.id,
+          v: 'secondary',
+          cls: 'flex-1'
+        })}
+      </div>
+    `)
+  }
+
+  // حفظ الملاحظات فقط دون تغيير الصورة أو المبلغ
+  Actions.saveInvoiceNotes = (el) => {
+    const id = el.dataset.id
+    const notes = UI.val('invoice-edit-notes').trim() || null
+
+    const invoice = Store.get().invoices.find(
+      (i) => String(i.id) === String(id)
+    )
+
+    if (!invoice) {
+      return UI.toast('لم يتم العثور على الفاتورة', 'err')
+    }
+
+    UI.busy(el, async () => {
+      try {
+        await Store.updateInvoice(id, { notes })
+
+        UI.closeModal()
+        UI.toast('تم تعديل ملاحظات الفاتورة بنجاح')
+      } catch (e) {
+        UI.toast(e.message || 'تعذّر تعديل الملاحظات', 'err')
+      }
+    })
+  }
+
+  // حذف الفاتورة
   Actions.deleteInvoice = async (el) => {
     const i = Store.get().invoices.find((x) => x.id === el.dataset.id)
 
