@@ -20,8 +20,16 @@
     const tabs = TABS.map((t) =>
       `<button data-a="setTab" data-id="${t.id}" class="min-h-[46px] rounded-xl text-sm font-extrabold transition ${tab === t.id ? 'bg-white text-brand shadow' : 'text-gray-600'}">${t.label}</button>`).join('')
 
-    const content = tab === 'workers' ? WorkersTab.render(project) : tab === 'invoices' ? InvoicesTab.render(project) : GroupPayTab.render(project)
+ const content = tab === 'workers' ? WorkersTab.render(project) : tab === 'invoices' ? InvoicesTab.render(project) : GroupPayTab.render(project)
 
+const reportButton = `
+  <button
+    data-a="printProjectReport"
+    data-id="${esc(project.id)}"
+    class="mb-3 min-h-[46px] w-full rounded-xl bg-gray-800 px-4 font-bold text-white active:bg-gray-700">
+    🖨️ تقرير المشروع PDF
+  </button>
+`
     return layout({
       title: project.name,
       subtitle: project.location ? '📍 ' + project.location : '',
