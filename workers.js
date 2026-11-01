@@ -135,12 +135,21 @@ const WorkersTab = (() => {
       }).join('<div class="h-3"></div>')
     }
 
-    return `
-      ${btn('＋ إضافة عامل', {
-        a: 'addWorker',
-        size: 'lg',
-        cls: 'w-full',
-      })}
+  return `
+  <div class="grid grid-cols-2 gap-2">
+    ${btn('＋ إضافة عامل', {
+      a: 'addWorker',
+      size: 'lg',
+      cls: 'w-full',
+    })}
+
+    ${btn('👥 إضافة مجموعة', {
+      a: 'addWorkerGroup',
+      size: 'lg',
+      cls: 'w-full',
+      v: 'secondary',
+    })}
+  </div>
 
       <div class="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1">
         ${chips}
