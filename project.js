@@ -252,35 +252,36 @@ const TABS = [
         ? PaymentsTab.render(project)
         : GroupPayTab.render(project)
 
-    const bulkButton = `
-      <button
-        data-a="openBulkEntry"
-        class="mb-3 min-h-[48px] w-full rounded-xl bg-brand px-4 font-bold text-white active:opacity-80">
-        📅 إضافة يوم عمل جماعي
-      </button>
-    `
+   const bulkButton = `
+  <button
+    data-a="openBulkEntry"
+    class="flex min-h-[64px] items-center justify-center rounded-xl bg-brand px-2 py-3 text-center text-sm font-bold leading-5 text-white active:opacity-80">
+    📅 إضافة يوم عمل جماعي
+  </button>
+`
 
-    const bulkAdvanceButton = `
-      <button
-        data-a="openBulkAdvance"
-        class="mb-3 min-h-[48px] w-full rounded-xl bg-green-700 px-4 font-bold text-white active:opacity-80">
-        💰 إضافة سلفة جماعية
-      </button>
-    `
+const bulkAdvanceButton = `
+  <button
+    data-a="openBulkAdvance"
+    class="flex min-h-[64px] items-center justify-center rounded-xl bg-green-700 px-2 py-3 text-center text-sm font-bold leading-5 text-white active:opacity-80">
+    💰 إضافة سلفة جماعية
+  </button>
+`
 
-    const reportButton = `
-      <button
-        data-a="printProjectReport"
-        data-id="${esc(project.id)}"
-        class="mb-3 min-h-[46px] w-full rounded-xl bg-gray-800 px-4 font-bold text-white active:bg-gray-700">
-        🖨️ تقرير المشروع PDF
-      </button>
-    `
-    const whatsappButton = `
+const reportButton = `
+  <button
+    data-a="printProjectReport"
+    data-id="${esc(project.id)}"
+    class="flex min-h-[58px] items-center justify-center rounded-xl bg-gray-800 px-2 py-3 text-center text-sm font-bold leading-5 text-white active:bg-gray-700">
+    🖨️ تقرير المشروع PDF
+  </button>
+`
+
+const whatsappButton = `
   <button
     data-a="shareProjectWhatsApp"
     data-id="${esc(project.id)}"
-    class="mb-3 min-h-[46px] w-full rounded-xl bg-green-600 px-4 font-bold text-white active:bg-green-700">
+    class="flex min-h-[58px] items-center justify-center rounded-xl bg-green-600 px-2 py-3 text-center text-sm font-bold leading-5 text-white active:bg-green-700">
     📲 مشاركة حسابات المشروع واتساب
   </button>
 `
@@ -294,11 +295,20 @@ const TABS = [
         <div class="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-gray-200 p-1 sm:grid-cols-4">
           ${tabs}
         </div>
-        ${bulkButton}
-        ${bulkAdvanceButton}
-        ${reportButton}
-        ${whatsappButton}
-        ${content}
+      <div class="mb-4">
+  <div class="mb-2 text-sm font-extrabold text-gray-700">
+    ⚡ إجراءات المشروع
+  </div>
+
+  <div class="grid grid-cols-2 gap-2">
+    ${bulkButton}
+    ${bulkAdvanceButton}
+    ${reportButton}
+    ${whatsappButton}
+  </div>
+</div>
+
+${content}
       `,
     })
   }
