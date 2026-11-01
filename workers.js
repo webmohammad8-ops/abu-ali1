@@ -336,6 +336,31 @@ const WorkersTab = (() => {
       UI.toast(e.message || 'تعذّر الحذف', 'err')
     }
   }
+  // طباعة كشف حساب العامل PDF
+  Actions.printWorkerStatement = (el) => {
+    const data = Store.get()
 
+    const worker = data.workers.find(
+      (w) => w.id === el.dataset.id
+    )
+
+    if (!worker) {
+      return UI.toast('لم يتم العثور على العامل', 'err')
+    }
+
+    if (typeof window.printInvoice !== 'function') {
+      return UI.toast('ملف الطباعة غير محمّل', 'err')
+    }
+
+    const workerEntries = data.entries.filter(
+      (e) => e.worker_id === worker.id
+    )
+
+    window.printInvoice({
+      name: worker.name,
+      sakneh: worker.sukneh_number,
+      job: worker.group_type
+    }, workerEntries)
+  }
   return { render }
 })()
