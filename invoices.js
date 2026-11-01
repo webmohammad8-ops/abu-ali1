@@ -16,16 +16,32 @@ const InvoicesTab = (() => {
 
     const gallery = list.length
       ? `<div class="grid grid-cols-2 gap-3">${list.map((i) => `
-          <button data-a="viewInvoice" data-id="${esc(i.id)}" class="overflow-hidden rounded-2xl border border-gray-200 bg-white text-start shadow-sm active:opacity-80">
+          <button
+            data-a="viewInvoice"
+            data-id="${esc(i.id)}"
+            class="overflow-hidden rounded-2xl border border-gray-200 bg-white text-start shadow-sm transition active:scale-[0.98]">
+
             ${i.image_url
               ? `<img src="${esc(i.image_url)}" alt="فاتورة" loading="lazy" class="aspect-[3/4] w-full bg-gray-100 object-cover">`
               : `<div class="flex aspect-[3/4] items-center justify-center bg-gray-100 text-4xl">🧾</div>`}
-            <div class="p-2">
-              <div class="font-extrabold">${fmt(i.amount)} ₪</div>
-              <div class="text-xs text-gray-400">${showDate(i.created_at.slice(0, 10))}</div>
-              ${i.notes ? `<div class="mt-1 line-clamp-2 text-xs text-gray-600">${esc(i.notes)}</div>` : ''}
+
+            <div class="p-3">
+              <div class="font-extrabold text-gray-900">
+                ${fmt(i.amount)} ₪
+              </div>
+
+              <div class="mt-1 text-xs text-gray-500">
+                📅 ${showDate(i.created_at.slice(0, 10))}
+              </div>
+
+              ${i.notes ? `
+                <div class="mt-2 line-clamp-2 text-xs leading-5 text-gray-600">
+                  ${esc(i.notes)}
+                </div>
+              ` : ''}
             </div>
-          </button>`).join('')}</div>`
+          </button>
+        `).join('')}</div>`
       : empty({
           icon: '🧾',
           title: 'لا توجد فواتير في هذا المشروع',
@@ -34,28 +50,40 @@ const InvoicesTab = (() => {
 
     return `
       <div class="grid grid-cols-2 gap-2">
-        ${btn('📷 رفع فاتورة من الجوال', {
+        ${btn('📷 رفع فاتورة', {
           a: 'addInvoice',
           size: 'lg',
-          cls: 'w-full'
+          cls: 'min-h-[52px] w-full',
         })}
 
         <button
           onclick="doPrint()"
-          style="border:1px solid #1e40ff; color:#1e40ff; background:white; padding:8px 16px; border-radius:20px; cursor:pointer; width:100%; font-weight:bold;"
-        >
+          class="flex min-h-[52px] w-full items-center justify-center rounded-xl border border-blue-600 bg-white px-2 text-sm font-bold text-blue-700 transition active:bg-blue-50">
           🖨️ طباعة الكشف
         </button>
       </div>
 
       ${list.length ? `
-        <div class="mt-3 flex justify-between rounded-xl bg-brand-light px-4 py-2 text-sm font-bold text-brand">
-          <span>${list.length} فاتورة</span>
-          <span>المجموع: ${fmt(sum)} ₪</span>
+        <div class="mt-4 flex items-center justify-between gap-2 rounded-xl border border-brand/10 bg-brand-light px-4 py-3">
+          <div>
+            <div class="text-xs text-brand opacity-80">عدد الفواتير</div>
+            <div class="mt-1 font-extrabold text-brand">
+              🧾 ${list.length} فاتورة
+            </div>
+          </div>
+
+          <div class="text-left">
+            <div class="text-xs text-brand opacity-80">إجمالي المبالغ</div>
+            <div class="mt-1 text-lg font-extrabold text-brand">
+              ${fmt(sum)} ₪
+            </div>
+          </div>
         </div>
       ` : ''}
 
-      <div class="mt-4">${gallery}</div>
+      <div class="mt-4">
+        ${gallery}
+      </div>
     `
   }
 
@@ -78,36 +106,59 @@ const InvoicesTab = (() => {
     if (save) save.disabled = !file
   }
 
+  // فتح نموذج رفع فاتورة
   Actions.addInvoice = () => {
     file = null
 
-    UI.openModal('رفع فاتورة', `
+    UI.openModal('🧾 رفع فاتورة', `
       <input id="inv-cam" type="file" accept="image/*" capture="environment" hidden>
       <input id="inv-gal" type="file" accept="image/*" hidden>
 
       <div id="inv-preview"></div>
 
-      <div class="mb-3 grid grid-cols-2 gap-2">
-        ${btn('📷 التقاط صورة', { a: 'invCam', v: 'secondary' })}
-        ${btn('🖼 من المعرض', { a: 'invGal', v: 'secondary' })}
+      <div class="mb-4 grid grid-cols-2 gap-2">
+        ${btn('📷 التقاط صورة', {
+          a: 'invCam',
+          v: 'secondary',
+          cls: 'min-h-[48px]',
+        })}
+
+        ${btn('🖼️ من المعرض', {
+          a: 'invGal',
+          v: 'secondary',
+          cls: 'min-h-[48px]',
+        })}
       </div>
 
-      ${field('المبلغ (₪)', `<input id="inv-amount" class="${inputCls}" inputmode="decimal" placeholder="0" autocomplete="off">`)}
+      ${field('المبلغ (₪)', `
+        <input
+          id="inv-amount"
+          class="${inputCls}"
+          inputmode="decimal"
+          placeholder="أدخل المبلغ"
+          autocomplete="off">
+      `)}
 
-      ${field('ملاحظات', `<input id="inv-notes" class="${inputCls}" autocomplete="off">`)}
+      ${field('ملاحظات', `
+        <input
+          id="inv-notes"
+          class="${inputCls}"
+          autocomplete="off"
+          placeholder="ملاحظات اختيارية">
+      `)}
 
-      <div class="flex gap-2">
-        ${btn('حفظ الفاتورة', {
+      <div class="mt-4 grid grid-cols-2 gap-2">
+        ${btn('💾 حفظ الفاتورة', {
           a: 'saveInvoice',
-          cls: 'flex-1',
+          cls: 'w-full',
           attrs: 'id="inv-save"',
-          disabled: true
+          disabled: true,
         })}
 
         ${btn('إلغاء', {
           a: 'modal-close',
           v: 'secondary',
-          cls: 'flex-1'
+          cls: 'w-full',
         })}
       </div>
     `,
@@ -157,6 +208,7 @@ const InvoicesTab = (() => {
     })
   }
 
+  // حفظ الفاتورة
   Actions.saveInvoice = (el) => {
     if (!file) return UI.toast('التقط صورة الفاتورة أولًا', 'err')
 
@@ -212,27 +264,34 @@ const InvoicesTab = (() => {
     if (!i) return
 
     UI.openModal(`${fmt(i.amount)} ₪ • ${showDate(i.created_at.slice(0, 10))}`, `
-      ${i.image_url ? `<img src="${esc(i.image_url)}" alt="فاتورة" class="mb-3 w-full rounded-xl bg-gray-100">` : ''}
+      ${i.image_url
+        ? `<img src="${esc(i.image_url)}" alt="فاتورة" class="mb-4 w-full rounded-xl bg-gray-100">`
+        : ''}
 
-      ${i.notes ? `<p class="mb-3 text-gray-700">${esc(i.notes)}</p>` : ''}
+      ${i.notes
+        ? `<div class="mb-4 rounded-xl bg-gray-50 p-3 text-sm leading-6 text-gray-700">${esc(i.notes)}</div>`
+        : ''}
 
-      <div class="flex flex-wrap gap-2">
+      <div class="grid grid-cols-2 gap-2">
         ${i.image_url
-          ? `<a href="${esc(i.image_url)}" target="_blank" rel="noreferrer" class="flex-1">${btn('فتح الصورة', { v: 'secondary', cls: 'w-full' })}</a>`
+          ? `<a href="${esc(i.image_url)}" target="_blank" rel="noreferrer" class="block">${btn('🔍 فتح الصورة', {
+              v: 'secondary',
+              cls: 'min-h-[46px] w-full',
+            })}</a>`
           : ''}
 
         ${btn('✏️ تعديل الملاحظات', {
           a: 'editInvoiceNotes',
           id: i.id,
           v: 'secondary',
-          cls: 'flex-1'
+          cls: 'min-h-[46px] w-full',
         })}
 
-        ${btn('🗑 حذف', {
+        ${btn('🗑 حذف الفاتورة', {
           a: 'deleteInvoice',
           id: i.id,
           v: 'danger',
-          cls: 'flex-1'
+          cls: 'min-h-[46px] w-full col-span-2',
         })}
       </div>
     `)
@@ -257,18 +316,18 @@ const InvoicesTab = (() => {
           placeholder="اكتب ملاحظات الفاتورة هنا">${esc(invoice.notes || '')}</textarea>
       `)}
 
-      <div class="flex gap-2">
+      <div class="grid grid-cols-2 gap-2">
         ${btn('💾 حفظ الملاحظات', {
           a: 'saveInvoiceNotes',
           id: invoice.id,
-          cls: 'flex-1'
+          cls: 'w-full',
         })}
 
         ${btn('إلغاء', {
           a: 'viewInvoice',
           id: invoice.id,
           v: 'secondary',
-          cls: 'flex-1'
+          cls: 'w-full',
         })}
       </div>
     `)
