@@ -276,6 +276,14 @@ const TABS = [
         🖨️ تقرير المشروع PDF
       </button>
     `
+    const whatsappButton = `
+  <button
+    data-a="shareProjectWhatsApp"
+    data-id="${esc(project.id)}"
+    class="mb-3 min-h-[46px] w-full rounded-xl bg-green-600 px-4 font-bold text-white active:bg-green-700">
+    📲 مشاركة حسابات المشروع واتساب
+  </button>
+`
 
     return layout({
       title: project.name,
@@ -289,6 +297,7 @@ const TABS = [
         ${bulkButton}
         ${bulkAdvanceButton}
         ${reportButton}
+        ${whatsappButton}
         ${content}
       `,
     })
