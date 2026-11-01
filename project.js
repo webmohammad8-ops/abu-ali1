@@ -35,7 +35,7 @@ const reportButton = `
       subtitle: project.location ? '📍 ' + project.location : '',
       back: '#/',
       actions: `<button data-a="deleteProject" data-id="${esc(project.id)}" aria-label="حذف المشروع" class="h-10 w-10 shrink-0 rounded-full bg-white/15 active:bg-white/25">🗑</button>`,
-      body: `<div class="mb-4 grid grid-cols-3 gap-2 rounded-2xl bg-gray-200 p-1">${tabs}</div>${content}`,
+      body: `<div class="mb-4 grid grid-cols-3 gap-2 rounded-2xl bg-gray-200 p-1">${tabs}</div>${reportButton}${content}`,
     })
   }
 
@@ -55,4 +55,32 @@ const reportButton = `
       UI.toast(e.message || 'تعذّر الحذف', 'err')
     }
   }
+  // طباعة تقرير حسابات المشروع
+Actions.printProjectReport = (el) => {
+  const data = Store.get()
+
+  const project = data.projects.find(
+    (p) => p.id === el.dataset.id
+  )
+
+  if (!project) {
+    return UI.toast('لم يتم العثور على المشروع', 'err')
+  }
+
+  if (typeof window.printProjectReport !== 'function') {
+    return UI.toast('ملف تقرير المشروع غير محمّل', 'err')
+  }
+
+  const workers = data.workers.filter(
+    (w) => w.project_id === project.id
+  )
+
+  const workerIds = new Set(workers.map((w) => w.id))
+
+  const entries = data.entries.filter(
+    (e) => workerIds.has(e.worker_id)
+  )
+
+  window.printProjectReport(project, workers, entries)
+}
 })()
