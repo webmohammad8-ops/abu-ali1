@@ -64,11 +64,85 @@
     button {
       font-family: inherit;
     }
+    /* شاشة تسجيل الدخول */
+#password-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.password-box {
+  width: 100%;
+  max-width: 380px;
+  background: white;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.password-box input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  margin: 20px 0 12px;
+  font-size: 17px;
+  text-align: center;
+  outline: none;
+}
+
+.password-box button {
+  width: 100%;
+  padding: 14px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#password-error {
+  color: #dc2626;
+  font-size: 14px;
+  margin-top: 12px;
+}
   </style>
 </head>
 
 <body>
+<div id="password-screen">
+  <div class="password-box">
+    <h2 style="font-size:25px;font-weight:800;color:#111827">
+      المقاول أبو علي
+    </h2>
 
+    <p style="color:#6b7280;margin-top:8px">
+      أدخل كلمة المرور للدخول إلى النظام
+    </p>
+
+    <form id="password-form">
+      <input
+        type="password"
+        id="site-password"
+        placeholder="كلمة المرور"
+        autocomplete="current-password"
+        required
+      />
+
+      <button type="submit">دخول إلى النظام</button>
+    </form>
+
+    <div id="password-error"></div>
+  </div>
+</div>
   <div id="app">
     <div style="padding:80px 0;text-align:center;color:#6b7280">
       جارٍ التحميل…
@@ -99,6 +173,28 @@
   <script src="archive.js"></script>
   <script src="app.js"></script>
   <script src="print.js"></script>
+<script>
+(function () {
+  const PASSWORD = '12345678'; // غيّر كلمة المرور من هنا
 
+  const screen = document.getElementById('password-screen');
+  const form = document.getElementById('password-form');
+  const input = document.getElementById('site-password');
+  const error = document.getElementById('password-error');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    if (input.value === PASSWORD) {
+      screen.style.display = 'none';
+      input.value = '';
+    } else {
+      error.textContent = 'كلمة المرور غير صحيحة';
+      input.value = '';
+      input.focus();
+    }
+  });
+})();
+</script>
 </body>
 </html>
