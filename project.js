@@ -422,10 +422,13 @@
           autocomplete="off">
       `)}
 
-      <div class="mb-3 rounded-xl bg-gray-50 p-3 text-sm">
-        <div class="font-bold">تاريخ السلفة</div>
-        <div class="mt-1 text-gray-600">${Calc.todayStr()}</div>
-      </div>
+    ${field('تاريخ السلفة', `
+  <input
+    id="bulk-advance-date"
+    type="date"
+    class="${inputCls}"
+    value="${Calc.todayStr()}">
+`)}
 
       <div class="mb-2 mt-4 flex items-center justify-between gap-2">
         <span class="font-extrabold">اختر العمال</span>
@@ -495,7 +498,11 @@
       (w) => selectedIds.includes(w.id)
     )
 
-    const date = Calc.todayStr()
+    const date = UI.val('bulk-advance-date')
+
+if (!date) {
+  return UI.toast('اختر تاريخ السلفة', 'err')
+}
     const entries = Store.get().entries
 
     const updates = []
