@@ -48,9 +48,18 @@ const WorkersTab = (() => {
             ${workerRate !== null ? '<span class="text-xs text-brand">(يومية خاصة)</span>' : '<span class="text-xs text-gray-400">(يومية المجموعة)</span>'}
           </div>
           <div class="mt-3 flex items-center justify-between gap-2">
-            <div><div class="text-xs text-gray-500">إجمالي حسابه</div>${balance(Calc.total(by[w.id] || []), true)}</div>
-            <a href="#/p/${esc(project.id)}/w/${esc(w.id)}">${btn('أرشيفه ←')}</a>
-          </div>`)
+  <div>
+    <div class="text-xs text-gray-500">إجمالي حسابه</div>
+    ${balance(Calc.total(by[w.id] || []), true)}
+  </div>
+  <div class="flex gap-2">
+    <button data-a="printWorkerStatement" data-id="${esc(w.id)}"
+      class="min-h-[42px] rounded-xl bg-gray-100 px-3 text-sm font-bold active:bg-gray-200">
+      🖨️ كشف PDF
+    </button>
+    <a href="#/p/${esc(project.id)}/w/${esc(w.id)}">${btn('أرشيفه ←')}</a>
+  </div>
+</div>
       }).join('<div class="h-3"></div>')
 
     return `${btn('＋ إضافة عامل', { a: 'addWorker', size: 'lg', cls: 'w-full' })}
