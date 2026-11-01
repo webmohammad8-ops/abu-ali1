@@ -82,13 +82,7 @@ const WorkersTab = (() => {
             cls: 'w-full'
           })}
         </div>
-
-        <button
-          onclick="printWorkerInvoice('اسم العامل', 'المشروع', 'المبلغ', 'التاريخ')"
-          class="min-h-[48px] shrink-0 rounded-xl border border-brand bg-white px-4 font-bold text-brand"
-        >
-          🧾 فاتورة
-        </button>
+<button onclick="printWorkerFullStatement('سكنة - طوبار', 'طوبار', allRecords)">🖨️ طباعة الكشف</button>
       </div>
 
       <div class="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1">
