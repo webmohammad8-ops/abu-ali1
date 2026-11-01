@@ -56,10 +56,23 @@ const GroupPayTab = (() => {
       ws.forEach((w) => (bal[w.id] = Calc.total(by[w.id] || [])))
     }
 
-    const groupBtns = GROUPS.map((g) => {
-      const c = all.filter((w) => w.group_type === g).length
-      return `<button data-a="gpGroup" data-id="${g}" class="min-h-[56px] rounded-xl border text-sm font-extrabold ${G.group === g ? 'border-brand bg-brand text-white' : 'border-gray-300 bg-white'}">${g}<div class="text-xs font-normal opacity-80">${c} عامل</div></button>`
-    }).join('')
+   // استخراج المهن الموجودة فعليًا في المشروع
+const customGroups = [...new Set(
+  all.map((w) => String(w.group_type || '').trim())
+)].filter((g) => g && !GROUPS.includes(g))
+ .sort((a, b) => a.localeCompare(b, 'ar'))
+
+// المهن الأساسية أولًا، ثم المهن التي أضافها المقاول
+const groups = [
+  ...GROUPS.filter((g) => all.some((w) => w.group_type === g)),
+  ...customGroups
+]
+
+const groupBtns = groups.map((g) => {
+  const c = all.filter((w) => w.group_type === g).length
+
+  return `<button data-a="gpGroup" data-id="${esc(g)}" class="min-h-[56px] rounded-xl border text-sm font-extrabold ${G.group === g ? 'border-brand bg-brand text-white' : 'border-gray-300 bg-white'}">${esc(g)}<div class="text-xs font-normal opacity-80">${c} عامل</div></button>`
+}).join('')
 
     let rest = ''
     if (!G.group) rest = empty({ icon: '👆', title: 'اختر مجموعة للبدء' })
