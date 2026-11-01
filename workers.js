@@ -53,13 +53,24 @@ const WorkersTab = (() => {
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
             <div class="truncate text-lg font-extrabold">${esc(w.name)}</div>
+
             <div class="mt-1 flex flex-wrap gap-2 text-sm">
-              <span class="rounded-lg bg-gray-100 px-2 py-0.5 text-gray-700">سكنة: ${esc(w.sukneh_number || '—')}</span>
-              <span class="rounded-lg bg-brand-light px-2 py-0.5 font-bold text-brand">${esc(w.group_type)}</span>
+              <span class="rounded-lg bg-gray-100 px-2 py-0.5 text-gray-700">
+                سكنة: ${esc(w.sukneh_number || '—')}
+              </span>
+
+              <span class="rounded-lg bg-brand-light px-2 py-0.5 font-bold text-brand">
+                ${esc(w.group_type)}
+              </span>
             </div>
           </div>
 
-          <button data-a="editWorker" data-id="${esc(w.id)}" aria-label="تعديل" class="h-10 w-10 shrink-0 rounded-full bg-gray-100 active:bg-gray-200">✎</button>
+          <button
+            data-a="editWorker"
+            data-id="${esc(w.id)}"
+            aria-label="تعديل"
+            class="h-10 w-10 shrink-0 rounded-full bg-gray-100 active:bg-gray-200"
+          >✎</button>
         </div>
 
         <div class="mt-3 flex items-center justify-between gap-2">
@@ -68,15 +79,18 @@ const WorkersTab = (() => {
             ${balance(Calc.total(by[w.id] || []), true)}
           </div>
 
-          <a href="#/p/${esc(project.id)}/w/${esc(w.id)}">${btn('أرشيفه ←')}</a>
-
-          <button
-            onclick="printWorkerFullStatement('${esc(w.sukneh_number || '')}', '${esc(w.group_type)}', ${JSON.stringify(by[w.id] || []).replace(/'/g, '&#39;')})"
-            class="rounded-xl border border-brand px-3 py-2 text-sm font-bold text-brand"
-          >
-            🖨️ طباعة الكشف
-          </button>
+          <a href="#/p/${esc(project.id)}/w/${esc(w.id)}">
+            ${btn('أرشيفه ←')}
+          </a>
         </div>
+
+        <button
+          data-a="printWorkerStatement"
+          data-id="${esc(w.id)}"
+          class="mt-3 w-full rounded-xl border border-brand px-3 py-3 text-sm font-bold text-brand"
+        >
+          🖨️ كشف حساب PDF
+        </button>
       `)).join('<div class="h-3"></div>')
     }
 
@@ -156,6 +170,30 @@ const WorkersTab = (() => {
   Actions.workerFilter = (el) => {
     S.filter = el.dataset.id
     App.render(true)
+  }
+
+  // طباعة كشف حساب العامل
+  Actions.printWorkerStatement = (el) => {
+    const id = el.dataset.id
+    const { workers, entries } = Store.get()
+
+    const worker = workers.find((w) => w.id === id)
+
+    if (!worker) {
+      return UI.toast('العامل غير موجود', 'err')
+    }
+
+    const workerEntries = entries.filter((e) => e.worker_id === id)
+
+    if (typeof window.printInvoice !== 'function') {
+      return UI.toast('دالة طباعة الكشف غير موجودة في print.js', 'err')
+    }
+
+    window.printInvoice({
+      name: worker.name,
+      sakneh: worker.sukneh_number,
+      job: worker.group_type
+    }, workerEntries)
   }
 
   Actions.addWorker = () =>
