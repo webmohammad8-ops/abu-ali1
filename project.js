@@ -3,11 +3,223 @@
 ;(() => {
   const { esc, btn, empty, layout, field, inputCls } = UI
 
-  const TABS = [
-    { id: 'workers', label: '👷 العمال' },
-    { id: 'invoices', label: '🧾 الفواتير' },
-    { id: 'pay', label: '💵 الدفعات' },
-  ]
+const TABS = [
+  { id: 'workers', label: '👷 العمال' },
+  { id: 'invoices', label: '🧾 الفواتير' },
+  { id: 'pay', label: '💵 الدفعات' },
+  { id: 'payments', label: '💰 استلامات الشركة' },
+]
+  
+  // ---------- تبويب استلامات الشركة ----------
+
+  const PaymentsTab = {
+    render(project) {
+      const payments = Store.get().payments
+        .filter((p) => p.project_id === project.id)
+        .sort((a, b) => b.date.localeCompare(a.date))
+
+      const rows = payments.length
+        ? payments.map((p) => `
+            <div class="rounded-xl border border-gray-200 bg-white p-3">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <div class="text-lg font-extrabold text-green-700">
+                    ${Calc.fmt(p.amount)} ₪
+                  </div>
+                  <div class="mt-1 text-sm text-gray-500">
+                    📅 ${esc(p.date)}
+                  </div>
+                </div>
+
+                <div class="flex gap-2">
+                  <button
+                    data-a="editPayment"
+                    data-id="${esc(p.id)}"
+                    class="rounded-lg bg-blue-50 px-3 py-2 text-sm font-bold text-blue-700">
+                    تعديل
+                  </button>
+
+                  <button
+                    data-a="deletePayment"
+                    data-id="${esc(p.id)}"
+                    class="rounded-lg bg-red-50 px-3 py-2 text-sm font-bold text-red-700">
+                    حذف
+                  </button>
+                </div>
+              </div>
+            </div>
+          `).join('')
+        : empty({
+            icon: '💰',
+            title: 'لا توجد استلامات مسجلة',
+          })
+
+      return `
+        <button
+          data-a="openPayment"
+          class="mb-4 min-h-[48px] w-full rounded-xl bg-green-700 px-4 font-bold text-white active:opacity-80">
+          ➕ تسجيل استلام جديد
+        </button>
+
+        <div class="space-y-3">
+          ${rows}
+        </div>
+      `
+    },
+  }
+
+  // ---------- إضافة وتعديل استلام الشركة ----------
+
+  Actions.openPayment = () => {
+    const date = Calc.todayStr()
+
+    UI.openModal('💰 تسجيل استلام من الشركة', `
+      <input type="hidden" id="payment-id" value="">
+
+      ${field('المبلغ المستلم (₪)', `
+        <input
+          id="payment-amount"
+          type="number"
+          min="0.01"
+          step="0.01"
+          inputmode="decimal"
+          class="${inputCls}"
+          placeholder="أدخل المبلغ"
+          autocomplete="off">
+      `)}
+
+      ${field('تاريخ الاستلام', `
+        <input
+          id="payment-date"
+          type="date"
+          class="${inputCls}"
+          value="${date}">
+      `)}
+
+      <div class="flex gap-2">
+        ${btn('حفظ الاستلام', {
+          a: 'savePayment',
+          cls: 'flex-1',
+        })}
+
+        ${btn('إلغاء', {
+          a: 'modal-close',
+          v: 'secondary',
+          cls: 'flex-1',
+        })}
+      </div>
+    `)
+  }
+
+  Actions.editPayment = (el) => {
+    const payment = Store.get().payments.find(
+      (p) => String(p.id) === String(el.dataset.id)
+    )
+
+    if (!payment) {
+      return UI.toast('لم يتم العثور على الاستلام', 'err')
+    }
+
+    UI.openModal('✏️ تعديل الاستلام', `
+      <input
+        type="hidden"
+        id="payment-id"
+        value="${esc(payment.id)}">
+
+      ${field('المبلغ المستلم (₪)', `
+        <input
+          id="payment-amount"
+          type="number"
+          min="0.01"
+          step="0.01"
+          inputmode="decimal"
+          class="${inputCls}"
+          value="${esc(payment.amount)}">
+      `)}
+
+      ${field('تاريخ الاستلام', `
+        <input
+          id="payment-date"
+          type="date"
+          class="${inputCls}"
+          value="${esc(payment.date)}">
+      `)}
+
+      <div class="flex gap-2">
+        ${btn('حفظ التعديلات', {
+          a: 'savePayment',
+          cls: 'flex-1',
+        })}
+
+        ${btn('إلغاء', {
+          a: 'modal-close',
+          v: 'secondary',
+          cls: 'flex-1',
+        })}
+      </div>
+    `)
+  }
+
+  // ---------- حفظ الاستلام ----------
+
+  Actions.savePayment = (el) => {
+    const projectId = App.parseRoute().pid
+    const id = UI.val('payment-id')
+    const amount = Calc.toNum(UI.val('payment-amount'))
+    const date = UI.val('payment-date')
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return UI.toast('أدخل مبلغًا صحيحًا أكبر من صفر', 'err')
+    }
+
+    if (!date) {
+      return UI.toast('اختر تاريخ الاستلام', 'err')
+    }
+
+    const row = {
+      project_id: projectId,
+      amount,
+      date,
+    }
+
+    UI.busy(el, async () => {
+      try {
+        if (id) {
+          await Store.updatePayment(id, row)
+        } else {
+          await Store.addPayment(row)
+        }
+
+        UI.closeModal()
+        UI.toast(id ? 'تم تعديل الاستلام بنجاح' : 'تم تسجيل الاستلام بنجاح')
+      } catch (e) {
+        UI.toast(e.message || 'تعذّر حفظ الاستلام', 'err')
+      }
+    })
+  }
+
+  // ---------- حذف الاستلام ----------
+
+  Actions.deletePayment = async (el) => {
+    const payment = Store.get().payments.find(
+      (p) => String(p.id) === String(el.dataset.id)
+    )
+
+    if (!payment) {
+      return UI.toast('لم يتم العثور على الاستلام', 'err')
+    }
+
+    if (!window.confirm(
+      `حذف استلام بقيمة ${Calc.fmt(payment.amount)} ₪ بتاريخ ${payment.date}؟`
+    )) return
+
+    try {
+      await Store.deletePayment(payment.id)
+      UI.toast('تم حذف الاستلام')
+    } catch (e) {
+      UI.toast(e.message || 'تعذّر حذف الاستلام', 'err')
+    }
+  }
 
   Views.project = (r) => {
     const project = Store.get().projects.find((p) => p.id === r.pid)
@@ -32,11 +244,13 @@
     ).join('')
 
     const content =
-      tab === 'workers'
-        ? WorkersTab.render(project)
-        : tab === 'invoices'
-          ? InvoicesTab.render(project)
-          : GroupPayTab.render(project)
+  tab === 'workers'
+    ? WorkersTab.render(project)
+    : tab === 'invoices'
+      ? InvoicesTab.render(project)
+      : tab === 'payments'
+        ? PaymentsTab.render(project)
+        : GroupPayTab.render(project)
 
     const bulkButton = `
       <button
@@ -69,7 +283,7 @@
       back: '#/',
       actions: `<button data-a="deleteProject" data-id="${esc(project.id)}" aria-label="حذف المشروع" class="h-10 w-10 shrink-0 rounded-full bg-white/15 active:bg-white/25">🗑</button>`,
       body: `
-        <div class="mb-4 grid grid-cols-3 gap-2 rounded-2xl bg-gray-200 p-1">
+        <div class="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-gray-200 p-1 sm:grid-cols-4">
           ${tabs}
         </div>
         ${bulkButton}
