@@ -289,6 +289,7 @@ async function fetchAll(table) {
     },
 
     addWorker: (row) => insertOne('workers', row),
+    addWorkers: (rows) => insertMany('workers', rows),
     updateWorker: (id, patch) => updateOne('workers', id, patch),
 
     async deleteWorker(id) {
