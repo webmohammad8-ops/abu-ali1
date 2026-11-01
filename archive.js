@@ -83,7 +83,32 @@
 
   const blank = () => ({ date: Calc.todayStr(), daily_wage: '', food: '', smoke: '', advance: '', notes: '' })
 
-  Actions.addEntry = () => UI.openModal('إضافة يوم جديد', form(blank()), mount)
+  Actions.addEntry = () => {
+  const workerId = App.parseRoute().wid
+
+  const worker = Store.get().workers.find(
+    (w) => w.id === workerId
+  )
+
+  const groupRate = worker
+    ? Store.getRate(worker.group_type)
+    : 0
+
+  const workerRate =
+    worker &&
+    worker.daily_wage !== null &&
+    worker.daily_wage !== undefined &&
+    worker.daily_wage !== ''
+      ? toNum(worker.daily_wage)
+      : groupRate
+
+  const newEntry = {
+    ...blank(),
+    daily_wage: workerRate
+  }
+
+  UI.openModal('إضافة يوم جديد', form(newEntry), mount)
+}
 
   Actions.editEntry = (el) => {
     const e = Store.get().entries.find((x) => x.id === el.dataset.id)
