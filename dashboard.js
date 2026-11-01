@@ -67,11 +67,6 @@
         </div>
 
         ${btn('⚙️ إعدادات اليوميات', { a: 'openDailyRates', cls: 'mt-4 w-full', size: 'lg', v: 'secondary' })}
-        ${btn('📅 إضافة يوم عمل جماعي', {
-  a: 'openBulkEntry',
-  cls: 'mt-3 w-full',
-  size: 'lg'
-})}
 
         ${btn('＋ إضافة مشروع جديد', { a: 'addProject', size: 'lg', cls: 'mt-3 w-full' })}
         <h2 class="mb-2 mt-6 text-lg font-extrabold">المشاريع</h2>${projectsHtml}
@@ -125,94 +120,96 @@
       }
     })
   }
-// فتح نموذج إضافة يوم عمل جماعي
-Actions.openBulkEntry = () => {
-  const projects = Store.get().projects
 
-  if (!projects.length) {
-    return UI.toast('أضف مشروعًا أولًا', 'err')
+  // فتح نموذج إضافة يوم عمل جماعي - محفوظ كما هو
+  Actions.openBulkEntry = () => {
+    const projects = Store.get().projects
+
+    if (!projects.length) {
+      return UI.toast('أضف مشروعًا أولًا', 'err')
+    }
+
+    const options = projects.map((p) => `
+      <option value="${esc(p.id)}">${esc(p.name)}</option>
+    `).join('')
+
+    UI.openModal('📅 إضافة يوم عمل جماعي', `
+      ${field('اختر المشروع', `
+        <select id="bulk-project" class="${inputCls}">
+          ${options}
+        </select>
+      `)}
+
+      <div class="mb-3">
+        <div class="mb-2 text-sm font-bold">نوع التسجيل</div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <label>
+            <input type="radio" name="bulk-mode"
+              value="single" checked
+              class="peer sr-only"
+              onchange="document.getElementById('bulk-single').classList.remove('hidden'); document.getElementById('bulk-range').classList.add('hidden')">
+
+            <span class="block rounded-xl border p-3 text-center font-bold peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">
+              يوم واحد
+            </span>
+          </label>
+
+          <label>
+            <input type="radio" name="bulk-mode"
+              value="range"
+              class="peer sr-only"
+              onchange="document.getElementById('bulk-single').classList.add('hidden'); document.getElementById('bulk-range').classList.remove('hidden')">
+
+            <span class="block rounded-xl border p-3 text-center font-bold peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">
+              فترة زمنية
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div id="bulk-single">
+        ${field('تاريخ يوم العمل', `
+          <input id="bulk-date" type="date"
+            class="${inputCls}"
+            value="${Calc.todayStr()}">
+        `)}
+      </div>
+
+      <div id="bulk-range" class="hidden">
+        ${field('من تاريخ', `
+          <input id="bulk-from" type="date"
+            class="${inputCls}"
+            value="${Calc.todayStr()}">
+        `)}
+
+        ${field('إلى تاريخ', `
+          <input id="bulk-to" type="date"
+            class="${inputCls}"
+            value="${Calc.todayStr()}">
+        `)}
+      </div>
+
+      <p class="mb-3 text-xs text-gray-500">
+        سيتم تسجيل يومية كل عامل تلقائيًا حسب يوميته المحفوظة،
+        وستظهر السجلات داخل ملف كل عامل.
+      </p>
+
+      <div class="flex gap-2">
+        ${btn('متابعة', {
+          a: 'bulkEntryNext',
+          cls: 'flex-1'
+        })}
+
+        ${btn('إلغاء', {
+          a: 'modal-close',
+          v: 'secondary',
+          cls: 'flex-1'
+        })}
+      </div>
+    `)
   }
 
-  const options = projects.map((p) => `
-    <option value="${esc(p.id)}">${esc(p.name)}</option>
-  `).join('')
-
-  UI.openModal('📅 إضافة يوم عمل جماعي', `
-    ${field('اختر المشروع', `
-      <select id="bulk-project" class="${inputCls}">
-        ${options}
-      </select>
-    `)}
-
-    <div class="mb-3">
-      <div class="mb-2 text-sm font-bold">نوع التسجيل</div>
-
-      <div class="grid grid-cols-2 gap-2">
-        <label>
-          <input type="radio" name="bulk-mode"
-            value="single" checked
-            class="peer sr-only"
-            onchange="document.getElementById('bulk-single').classList.remove('hidden'); document.getElementById('bulk-range').classList.add('hidden')">
-
-          <span class="block rounded-xl border p-3 text-center font-bold peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">
-            يوم واحد
-          </span>
-        </label>
-
-        <label>
-          <input type="radio" name="bulk-mode"
-            value="range"
-            class="peer sr-only"
-            onchange="document.getElementById('bulk-single').classList.add('hidden'); document.getElementById('bulk-range').classList.remove('hidden')">
-
-          <span class="block rounded-xl border p-3 text-center font-bold peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">
-            فترة زمنية
-          </span>
-        </label>
-      </div>
-    </div>
-
-    <div id="bulk-single">
-      ${field('تاريخ يوم العمل', `
-        <input id="bulk-date" type="date"
-          class="${inputCls}"
-          value="${Calc.todayStr()}">
-      `)}
-    </div>
-
-    <div id="bulk-range" class="hidden">
-      ${field('من تاريخ', `
-        <input id="bulk-from" type="date"
-          class="${inputCls}"
-          value="${Calc.todayStr()}">
-      `)}
-
-      ${field('إلى تاريخ', `
-        <input id="bulk-to" type="date"
-          class="${inputCls}"
-          value="${Calc.todayStr()}">
-      `)}
-    </div>
-
-    <p class="mb-3 text-xs text-gray-500">
-      سيتم تسجيل يومية كل عامل تلقائيًا حسب يوميته المحفوظة،
-      وستظهر السجلات داخل ملف كل عامل.
-    </p>
-
-    <div class="flex gap-2">
-      ${btn('متابعة', {
-        a: 'bulkEntryNext',
-        cls: 'flex-1'
-      })}
-
-      ${btn('إلغاء', {
-        a: 'modal-close',
-        v: 'secondary',
-        cls: 'flex-1'
-      })}
-    </div>
-  `)
-}
   Actions.addProject = () => {
     UI.openModal('مشروع جديد', `
       ${field('اسم المشروع *', `<input id="pj-name" class="${inputCls}" autocomplete="off">`)}
