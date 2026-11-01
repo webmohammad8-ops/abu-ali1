@@ -69,6 +69,13 @@ const WorkersTab = (() => {
           </div>
 
           <a href="#/p/${esc(project.id)}/w/${esc(w.id)}">${btn('أرشيفه ←')}</a>
+
+          <button
+            onclick="printWorkerFullStatement('${esc(w.sukneh_number || '')}', '${esc(w.group_type)}', ${JSON.stringify(by[w.id] || []).replace(/'/g, '&#39;')})"
+            class="rounded-xl border border-brand px-3 py-2 text-sm font-bold text-brand"
+          >
+            🖨️ طباعة الكشف
+          </button>
         </div>
       `)).join('<div class="h-3"></div>')
     }
@@ -82,7 +89,6 @@ const WorkersTab = (() => {
             cls: 'w-full'
           })}
         </div>
-<button onclick="printWorkerFullStatement('سكنة - طوبار', 'طوبار', allRecords)">🖨️ طباعة الكشف</button>
       </div>
 
       <div class="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1">
