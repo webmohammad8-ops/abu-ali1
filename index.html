@@ -85,7 +85,32 @@
 
   <!-- Supabase (UMD، بدون بناء) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.46.1/dist/umd/supabase.js"></script>
-
+<script>
+// حل شامل لكل أزرار الطباعة
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  
+  // لو الزر فيه كلمة طباعة الكشف
+  if (btn.textContent.includes('طباعة الكشف')) {
+    e.preventDefault();
+    
+    // لاقي كرت العامل أو المشروع اللي فوق الزر
+    let card = btn.closest('div');
+    // اطبع بس الكرت
+    let originalContent = document.body.innerHTML;
+    
+    // خبي كل الأزرار وقت الطباعة
+    const style = document.createElement('style');
+    style.innerHTML = '@media print { button { display:none !important; } }';
+    document.head.appendChild(style);
+    
+    window.print();
+    
+    setTimeout(() => style.remove(), 1000);
+  }
+});
+</script>
   <!-- ملفات النظام -->
   <script src="config.js"></script>
   <script src="calc.js"></script>
