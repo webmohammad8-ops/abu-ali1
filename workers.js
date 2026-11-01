@@ -23,6 +23,15 @@ const WorkersTab = (() => {
       (by[e.worker_id] = by[e.worker_id] || []).push(e)
     })
 
+    // إضافة المهن الجديدة تلقائيًا إلى الفلاتر
+    const customGroups = [...new Set(
+      list
+        .map((w) => w.group_type)
+        .filter((g) => g && !GROUPS.includes(g))
+    )]
+
+    const allGroups = ['الكل', ...GROUPS, ...customGroups]
+
     const shown = S.filter === 'الكل'
       ? list
       : list.filter((w) => w.group_type === S.filter)
@@ -32,13 +41,13 @@ const WorkersTab = (() => {
         ? list.length
         : list.filter((w) => w.group_type === g).length
 
-    const chips = ['الكل', ...GROUPS].map((g) =>
-      `<button data-a="workerFilter" data-id="${g}"
+    const chips = allGroups.map((g) =>
+      `<button data-a="workerFilter" data-id="${esc(g)}"
         class="min-h-[42px] shrink-0 rounded-full border px-4 text-sm font-bold ${
           S.filter === g
             ? 'border-brand bg-brand text-white'
             : 'border-gray-300 bg-white text-gray-700'
-        }">${g} <span class="opacity-70">(${count(g)})</span></button>`
+        }">${esc(g)} <span class="opacity-70">(${count(g)})</span></button>`
     ).join('')
 
     let cards
@@ -145,24 +154,37 @@ const WorkersTab = (() => {
 
   // نموذج إضافة وتعديل العامل
   function form(w) {
-    const radios = GROUPS.map((g) => `
+    const isCustom = !GROUPS.includes(w.group_type) && !!w.group_type
+
+    const selectedGroup = isCustom
+      ? '__other__'
+      : (w.group_type || 'عامل')
+
+    const radios = [
+      ...GROUPS.map((g) => ({ value: g, label: g })),
+      { value: '__other__', label: 'أخرى' }
+    ].map((item) => `
       <label class="block">
         <input type="radio"
           name="wk-group"
-          value="${g}"
+          value="${esc(item.value)}"
           class="peer sr-only"
-          ${w.group_type === g ? 'checked' : ''}>
+          onchange="document.getElementById('wk-custom-wrap').classList.toggle('hidden', this.value !== '__other__')"
+          ${selectedGroup === item.value ? 'checked' : ''}>
 
         <span class="flex min-h-[48px] cursor-pointer items-center justify-center rounded-xl border border-gray-300 bg-white text-sm font-bold peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">
-          ${g}
+          ${esc(item.label)}
         </span>
       </label>
     `).join('')
 
-    const groupRate = Store.getRate(w.group_type || 'عامل')
+    const groupRate = isCustom
+      ? 0
+      : Store.getRate(w.group_type || 'عامل')
 
     const privateRate =
-      w.daily_wage === null || w.daily_wage === undefined
+      w.daily_wage === null ||
+      w.daily_wage === undefined
         ? ''
         : w.daily_wage
 
@@ -184,12 +206,23 @@ const WorkersTab = (() => {
 
       <div class="mb-3">
         <span class="mb-1 block text-sm font-bold text-gray-700">
-          المجموعة
+          المجموعة / المهنة
         </span>
 
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
           ${radios}
         </div>
+      </div>
+
+      <div id="wk-custom-wrap" class="${isCustom ? '' : 'hidden'} mb-3">
+        ${field(
+          'اكتب مهنة العامل *',
+          `<input id="wk-custom-job"
+            class="${inputCls}"
+            autocomplete="off"
+            placeholder="مثال: كهربجي، سبّاك، نجّار..."
+            value="${esc(isCustom ? w.group_type : '')}">`
+        )}
       </div>
 
       ${field(
@@ -200,13 +233,16 @@ const WorkersTab = (() => {
           min="0"
           step="0.01"
           inputmode="decimal"
-          placeholder="اتركه فارغًا لاستخدام يومية المجموعة"
+          placeholder="اكتب اليومية الخاصة بالعامل"
           value="${esc(privateRate)}">`
       )}
 
       <p class="mb-3 -mt-2 text-xs text-gray-500">
-        يومية المجموعة الحالية: ${fmt(groupRate)} ₪.
-        إذا تركت الحقل فارغًا سيعتمد العامل عليها تلقائيًا.
+        ${
+          isCustom
+            ? 'هذه مهنة مخصصة، يرجى تحديد اليومية الخاصة بها.'
+            : `يومية المجموعة الحالية: ${fmt(groupRate)} ₪. إذا تركت الحقل فارغًا سيعتمد العامل عليها تلقائيًا.`
+        }
       </p>
 
       <div class="mt-2 flex gap-2">
@@ -276,6 +312,16 @@ const WorkersTab = (() => {
       'input[name="wk-group"]:checked'
     )
 
+    const isCustom = g && g.value === '__other__'
+
+    const customJob = isCustom
+      ? UI.val('wk-custom-job').trim()
+      : ''
+
+    if (isCustom && !customJob) {
+      return UI.toast('اكتب مهنة العامل', 'err')
+    }
+
     const wageValue = UI.val('wk-wage').trim()
 
     if (
@@ -289,10 +335,20 @@ const WorkersTab = (() => {
       )
     }
 
+    // المهنة المخصصة تحتاج إلى يومية خاصة
+    if (isCustom && wageValue === '') {
+      return UI.toast(
+        'حدد اليومية الخاصة للعامل صاحب المهنة الأخرى',
+        'err'
+      )
+    }
+
     const row = {
       name,
       sukneh_number: UI.val('wk-suk').trim() || null,
-      group_type: g ? g.value : 'عامل',
+      group_type: isCustom
+        ? customJob
+        : (g ? g.value : 'عامل'),
       daily_wage: wageValue === '' ? null : toNum(wageValue),
     }
 
@@ -336,6 +392,7 @@ const WorkersTab = (() => {
       UI.toast(e.message || 'تعذّر الحذف', 'err')
     }
   }
+
   // طباعة كشف حساب العامل PDF
   Actions.printWorkerStatement = (el) => {
     const data = Store.get()
@@ -362,5 +419,6 @@ const WorkersTab = (() => {
       job: worker.group_type
     }, workerEntries)
   }
+
   return { render }
 })()
