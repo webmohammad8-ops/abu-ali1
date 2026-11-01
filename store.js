@@ -39,20 +39,32 @@ const Store = (() => {
   const remove = (list, id) => list.filter((x) => x.id !== id)
 
   // Supabase يرجّع 1000 صف كحد أقصى لكل طلب، لذلك نقرأ على دفعات
-  async function fetchAll(table) {
-    const out = []
-    for (let from = 0; ; from += 1000) {
-      const { data, error } = await sb
-        .from(table).select('*')
-        .order('created_at', { ascending: true }).order('id', { ascending: true })
-        .range(from, from + 999)
 
-      if (error) throw error
-      out.push(...data)
-      if (data.length < 1000) break
+async function fetchAll(table) {
+  const out = []
+
+  for (let from = 0; ; from += 1000) {
+    let query = sb.from(table).select('*')
+
+    if (table === TABLES.rates) {
+      query = query.order('group_type', { ascending: true })
+    } else {
+      query = query
+        .order('created_at', { ascending: true })
+        .order('id', { ascending: true })
     }
-    return out
+
+    const { data, error } = await query.range(from, from + 999)
+
+    if (error) throw error
+
+    out.push(...data)
+
+    if (data.length < 1000) break
   }
+
+  return out
+}
 
   async function load() {
     try {
