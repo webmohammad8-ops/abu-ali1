@@ -311,6 +311,7 @@ const Store = (() => {
     deleteEntry: (id) => deleteOne('entries', id),
 
     addInvoice: (row) => insertOne('invoices', row),
+updateInvoice: (id, patch) => updateOne('invoices', id, patch),
 
     async deleteInvoice(inv) {
       await deleteOne('invoices', inv.id)
