@@ -1,5 +1,5 @@
 
-// صفحة المشروع: العمال / الفواتير / الدفعات + يوميات جماعية
+// صفحة المشروع: العمال / الفواتير / الدفعات + اليوميات والسلف الجماعية
 ;(() => {
   const { esc, btn, empty, layout, field, inputCls } = UI
 
@@ -46,6 +46,14 @@
       </button>
     `
 
+    const bulkAdvanceButton = `
+      <button
+        data-a="openBulkAdvance"
+        class="mb-3 min-h-[48px] w-full rounded-xl bg-green-700 px-4 font-bold text-white active:opacity-80">
+        💰 إضافة سلفة جماعية
+      </button>
+    `
+
     const reportButton = `
       <button
         data-a="printProjectReport"
@@ -65,6 +73,7 @@
           ${tabs}
         </div>
         ${bulkButton}
+        ${bulkAdvanceButton}
         ${reportButton}
         ${content}
       `,
@@ -363,6 +372,196 @@
         )
       } catch (e) {
         UI.toast(e.message || 'تعذّر حفظ أيام العمل', 'err')
+      }
+    })
+  }
+
+  // ---------- إضافة سلفة جماعية ----------
+
+  Actions.openBulkAdvance = () => {
+    const projectId = App.parseRoute().pid
+
+    const workers = Store.get().workers.filter(
+      (w) => w.project_id === projectId
+    )
+
+    if (!workers.length) {
+      return UI.toast('لا يوجد عمال في هذا المشروع', 'err')
+    }
+
+    const workerList = workers.map((w) => `
+      <label class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3">
+        <input
+          type="checkbox"
+          name="bulk-advance-worker"
+          value="${esc(w.id)}"
+          checked
+          class="h-5 w-5 accent-current">
+
+        <span class="min-w-0 flex-1">
+          <span class="block font-bold">${esc(w.name)}</span>
+          <span class="text-xs text-gray-500">${esc(w.group_type || '')}</span>
+        </span>
+      </label>
+    `).join('')
+
+    UI.openModal('💰 إضافة سلفة جماعية', `
+      <div class="mb-3 rounded-xl bg-green-50 p-3 text-sm text-green-800">
+        أدخل مبلغ السلفة لكل عامل. يمكنك استثناء أي عامل من القائمة.
+      </div>
+
+      ${field('مبلغ السلفة لكل عامل (₪)', `
+        <input
+          id="bulk-advance-amount"
+          type="number"
+          min="0.01"
+          step="0.01"
+          inputmode="decimal"
+          class="${inputCls}"
+          placeholder="مثال: 500"
+          autocomplete="off">
+      `)}
+
+      <div class="mb-3 rounded-xl bg-gray-50 p-3 text-sm">
+        <div class="font-bold">تاريخ السلفة</div>
+        <div class="mt-1 text-gray-600">${Calc.todayStr()}</div>
+      </div>
+
+      <div class="mb-2 mt-4 flex items-center justify-between gap-2">
+        <span class="font-extrabold">اختر العمال</span>
+
+        <label class="flex cursor-pointer items-center gap-2 text-sm font-bold">
+          <input
+            id="bulk-advance-select-all"
+            type="checkbox"
+            checked
+            class="h-5 w-5 accent-current"
+            onchange="
+              document.querySelectorAll('input[name=bulk-advance-worker]').forEach(
+                cb => cb.checked = this.checked
+              )
+            ">
+          تحديد الكل
+        </label>
+      </div>
+
+      <div class="mb-4 max-h-64 space-y-2 overflow-y-auto rounded-xl">
+        ${workerList}
+      </div>
+
+      <p class="mb-3 text-xs text-gray-500">
+        ستُضاف السلفة إلى سلفة العامل الموجودة في سجل اليوم إن وُجدت،
+        دون تغيير اليومية أو الأكل أو الدخان.
+      </p>
+
+      <div class="flex gap-2">
+        ${btn('تسجيل السلفة', {
+          a: 'saveBulkAdvance',
+          cls: 'flex-1',
+        })}
+
+        ${btn('إلغاء', {
+          a: 'modal-close',
+          v: 'secondary',
+          cls: 'flex-1',
+        })}
+      </div>
+    `)
+  }
+
+  // حفظ السلفة الجماعية
+  Actions.saveBulkAdvance = (el) => {
+    const projectId = App.parseRoute().pid
+
+    const workers = Store.get().workers.filter(
+      (w) => w.project_id === projectId
+    )
+
+    const selectedIds = Array.from(
+      document.querySelectorAll('input[name="bulk-advance-worker"]:checked')
+    ).map((cb) => cb.value)
+
+    if (!selectedIds.length) {
+      return UI.toast('اختر عاملًا واحدًا على الأقل', 'err')
+    }
+
+    const amount = Calc.toNum(UI.val('bulk-advance-amount'))
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return UI.toast('أدخل مبلغ سلفة صحيحًا أكبر من صفر', 'err')
+    }
+
+    const selectedWorkers = workers.filter(
+      (w) => selectedIds.includes(w.id)
+    )
+
+    const date = Calc.todayStr()
+    const entries = Store.get().entries
+
+    const updates = []
+    const inserts = []
+
+    selectedWorkers.forEach((worker) => {
+      // البحث عن سجل العامل في تاريخ اليوم
+      const existing = entries.find(
+        (e) => e.worker_id === worker.id && e.date === date
+      )
+
+      if (existing) {
+        // إضافة السلفة إلى الموجودة مع الحفاظ على بقية البيانات
+        updates.push({
+          id: existing.id,
+          advance: Calc.toNum(existing.advance) + amount,
+        })
+      } else {
+        // إنشاء سجل جديد للسلفة فقط
+        inserts.push({
+          worker_id: worker.id,
+          date,
+          daily_wage: 0,
+          food: 0,
+          smoke: 0,
+          advance: amount,
+          notes: null,
+        })
+      }
+    })
+
+    const total = amount * selectedWorkers.length
+
+    const message =
+      `مبلغ السلفة لكل عامل: ${Calc.fmt(amount)} ₪\n` +
+      `عدد العمال: ${selectedWorkers.length}\n` +
+      `إجمالي السلف: ${Calc.fmt(total)} ₪\n\n` +
+      `سيتم تحديث ${updates.length} سجل موجود وإنشاء ${inserts.length} سجل جديد.\n\n` +
+      `هل تريد المتابعة؟`
+
+    if (!window.confirm(message)) return
+
+    UI.busy(el, async () => {
+      try {
+        // تحديث سجلات اليوم الموجودة دون المساس ببقية الحقول
+        for (const item of updates) {
+          await Store.updateEntry(item.id, {
+            advance: item.advance,
+          })
+        }
+
+        // إنشاء سجلات جديدة للعمال الذين لا يملكون سجلًا اليوم
+        if (inserts.length) {
+          await Store.addEntries(inserts)
+        }
+
+        UI.closeModal()
+
+        UI.toast(
+          `تم تسجيل السلفة لـ ${selectedWorkers.length} عامل بنجاح`
+        )
+      } catch (e) {
+        UI.toast(
+          e.message || 'تعذّر حفظ السلف الجماعية. تحقق من السجلات قبل إعادة المحاولة.',
+          'err'
+        )
       }
     })
   }
