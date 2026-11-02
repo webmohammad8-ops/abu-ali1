@@ -15,18 +15,18 @@ const UI = (() => {
 
   // حقول الإدخال
   const inputCls =
-    'w-full min-h-[48px] rounded-xl border border-gray-200 bg-white px-4 text-base text-gray-800 outline-none transition duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:border-brand focus:ring-4 focus:ring-blue-100'
+    'w-full min-h-[50px] rounded-xl border border-slate-200 bg-slate-50 px-4 text-base text-slate-800 outline-none transition duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-brand focus:bg-white focus:ring-4 focus:ring-blue-100'
 
   // ألوان الأزرار
   const VARIANTS = {
     primary:
-      'bg-brand text-white shadow-sm hover:bg-brand-dark hover:shadow-md active:scale-[0.98] disabled:bg-blue-300',
+      'bg-brand text-white shadow-[0_5px_14px_rgba(49,94,232,0.20)] hover:bg-brand-dark hover:shadow-[0_8px_20px_rgba(49,94,232,0.25)] active:scale-[0.98] disabled:bg-blue-300 disabled:shadow-none',
 
     secondary:
-      'border border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 hover:bg-gray-100 active:scale-[0.98] disabled:text-gray-400',
+      'border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] disabled:text-slate-400',
 
     danger:
-      'border border-red-100 bg-red-50 text-red-600 hover:bg-red-100 active:scale-[0.98]',
+      'border border-red-100 bg-red-50 text-red-600 hover:border-red-200 hover:bg-red-100 active:scale-[0.98]',
 
   }
 
@@ -34,10 +34,10 @@ const UI = (() => {
   function btn(label, o = {}) {
     const size =
       o.size === 'lg'
-        ? 'min-h-[56px] text-lg px-5'
+        ? 'min-h-[56px] text-lg px-6'
         : o.size === 'sm'
           ? 'min-h-[40px] text-sm px-3'
-          : 'min-h-[48px] text-base px-4'
+          : 'min-h-[48px] text-base px-5'
 
     return `<button
       type="button"
@@ -45,57 +45,60 @@ const UI = (() => {
       ${o.id != null ? `data-id="${esc(o.id)}"` : ''}
       ${o.attrs || ''}
       ${o.disabled ? 'disabled' : ''}
-      class="inline-flex items-center justify-center gap-2 rounded-xl font-bold transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 disabled:cursor-not-allowed ${size} ${VARIANTS[o.v || 'primary']} ${o.cls || ''}">
+      class="inline-flex items-center justify-center gap-2 rounded-xl font-extrabold transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 disabled:cursor-not-allowed ${size} ${VARIANTS[o.v || 'primary']} ${o.cls || ''}">
       ${label}
     </button>`
   }
 
   // عنوان الحقل ومحتواه
   const field = (label, inner, hint) =>
-    `<label class="mb-4 block">
-      <span class="mb-2 block text-sm font-bold text-gray-700">${label}</span>
+    `<label class="mb-5 block">
+      <span class="mb-2 block text-sm font-extrabold text-slate-700">${label}</span>
       ${inner}
       ${
         hint
-          ? `<span class="mt-2 block text-xs leading-5 text-gray-500">${hint}</span>`
+          ? `<span class="mt-2 block text-xs leading-6 text-slate-500">${hint}</span>`
           : ''
       }
     </label>`
 
   // البطاقات
   const card = (inner, cls = '') =>
-    `<div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-md ${cls}">
+    `<div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_3px_14px_rgba(16,28,53,0.035)] transition-all duration-200 hover:border-slate-300/90 hover:shadow-[0_8px_24px_rgba(16,28,53,0.065)] sm:rounded-3xl sm:p-5 ${cls}">
       ${inner}
     </div>`
 
   // مؤشر التحميل
   const spinner = (cls = '') =>
     `<span
-      class="inline-block h-6 w-6 animate-spin rounded-full border-[3px] border-gray-200 border-t-brand ${cls}"
+      class="inline-block h-6 w-6 animate-spin rounded-full border-[3px] border-slate-200 border-t-brand ${cls}"
       role="status"
       aria-label="جارٍ التحميل">
     </span>`
 
   // شاشة التحميل
   const pageLoader = (text = 'جارٍ التحميل…') =>
-    `<div class="flex flex-col items-center justify-center gap-4 py-24 text-gray-500">
-      ${spinner('h-10 w-10')}
-      <span class="text-sm font-bold">${text}</span>
+    `<div class="flex min-h-[55vh] flex-col items-center justify-center gap-5 text-slate-500">
+      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50">
+        ${spinner('h-9 w-9')}
+      </div>
+      <span class="text-sm font-extrabold">${text}</span>
+      <span class="text-xs text-slate-400">يرجى الانتظار قليلًا</span>
     </div>`
 
   // حالة عدم وجود بيانات
   const empty = (o) =>
-    `<div class="flex flex-col items-center rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-12 text-center">
-      <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 text-4xl">
+    `<div class="flex flex-col items-center rounded-3xl border border-dashed border-slate-300 bg-white px-5 py-12 text-center shadow-sm">
+      <div class="mb-5 flex h-[76px] w-[76px] items-center justify-center rounded-3xl border border-blue-100 bg-blue-50 text-4xl">
         ${o.icon || '📭'}
       </div>
-      <div class="font-extrabold text-gray-800">${o.title}</div>
+      <div class="font-extrabold text-slate-800 text-lg">${o.title}</div>
       ${
         o.hint
-          ? `<div class="mt-2 max-w-xs text-sm leading-6 text-gray-500">${o.hint}</div>`
+          ? `<div class="mt-2 max-w-xs text-sm leading-7 text-slate-500">${o.hint}</div>`
           : ''
       }
-      ${o.action ? `<div class="mt-5">${o.action}</div>` : ''}
+      ${o.action ? `<div class="mt-6">${o.action}</div>` : ''}
     </div>`
 
   // رصيد العامل
@@ -103,10 +106,10 @@ const UI = (() => {
   function balance(value, big) {
     const cls =
       value > 0
-        ? 'text-green-700 bg-green-50 border border-green-100'
+        ? 'text-emerald-700 bg-emerald-50 border border-emerald-200'
         : value < 0
-          ? 'text-red-700 bg-red-50 border border-red-100'
-          : 'text-gray-600 bg-gray-100 border border-gray-200'
+          ? 'text-red-700 bg-red-50 border border-red-200'
+          : 'text-slate-600 bg-slate-100 border border-slate-200'
 
     const n = Math.abs(value).toLocaleString('en-US', {
       maximumFractionDigits: 2
@@ -114,7 +117,7 @@ const UI = (() => {
 
     return `<span
       dir="ltr"
-      class="inline-block whitespace-nowrap rounded-full px-3 py-1.5 font-extrabold ${big ? 'text-lg' : 'text-sm'} ${cls}">
+      class="inline-flex items-center justify-center whitespace-nowrap rounded-xl px-3.5 py-2 font-extrabold ${big ? 'text-xl' : 'text-sm'} ${cls}">
       ${value < 0 ? '-' : ''}${n} ₪
     </span>`
   }
@@ -123,11 +126,16 @@ const UI = (() => {
   function layout({ title, subtitle = '', back = '', actions = '', body = '' }) {
     const live = Store.get().live
 
-    return `<div class="mx-auto min-h-screen max-w-3xl bg-gray-50 pb-16">
+    return `<div class="mx-auto min-h-screen w-full max-w-5xl bg-[#f3f6fb] pb-20">
 
-      <header class="sticky top-0 z-30 border-b border-blue-700/20 bg-gradient-to-l from-blue-700 via-blue-600 to-brand px-4 pb-4 pt-4 text-white shadow-md">
+      <!-- رأس التطبيق -->
+      <header class="sticky top-0 z-30 overflow-hidden border-b border-white/10 bg-[#101c35] px-4 pb-4 pt-4 text-white shadow-[0_8px_25px_rgba(10,20,40,0.16)] sm:px-6">
 
-        <div class="flex items-center gap-3">
+        <div class="pointer-events-none absolute -left-16 -top-24 h-56 w-56 rounded-full border border-white/[0.045]"></div>
+        <div class="pointer-events-none absolute -left-8 -top-16 h-36 w-36 rounded-full border border-white/[0.045]"></div>
+        <div class="pointer-events-none absolute bottom-0 right-0 h-1 w-full bg-gradient-to-l from-blue-400 via-brand to-transparent opacity-80"></div>
+
+        <div class="relative flex items-center gap-3">
 
           ${
             back
@@ -135,39 +143,60 @@ const UI = (() => {
                   data-a="nav"
                   data-id="${esc(back)}"
                   aria-label="رجوع"
-                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-xl transition hover:bg-white/20 active:scale-95">
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.07] text-xl text-white transition hover:border-white/20 hover:bg-white/[0.14] active:scale-95">
                   →
                 </button>`
-              : ''
+              : `<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.08] text-xl shadow-inner">
+                  <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18"/>
+                    <path d="M5 21V7l8-4v18"/>
+                    <path d="M19 21V11l-6-4"/>
+                    <path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/>
+                    <path d="M16 13v.01M16 16v.01M16 19v.01"/>
+                  </svg>
+                </div>`
           }
 
           <div class="min-w-0 flex-1">
 
-            <a href="#/" class="block truncate text-xl font-extrabold leading-tight tracking-tight">
+            <a href="#/" class="block truncate text-lg font-extrabold leading-tight tracking-tight sm:text-xl">
               ${esc(title)}
             </a>
 
             ${
               subtitle
-                ? `<div class="mt-1 truncate text-sm font-medium text-blue-100">${esc(subtitle)}</div>`
-                : ''
+                ? `<div class="mt-1 truncate text-xs font-medium text-slate-300 sm:text-sm">${esc(subtitle)}</div>`
+                : `<div class="mt-1 text-[11px] font-medium text-slate-400">نظام إدارة حسابات المقاولين</div>`
             }
 
           </div>
 
-          <span
-            title="${live ? 'متصل — التحديث فوري' : 'غير متصل بالتحديث الفوري'}"
-            class="h-3 w-3 shrink-0 rounded-full border-2 border-white/30 ${live ? 'bg-green-400' : 'bg-yellow-300 animate-pulse'}">
-          </span>
+          <div class="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-2.5 py-2">
+
+            <span
+              title="${live ? 'متصل — التحديث فوري' : 'غير متصل بالتحديث الفوري'}"
+              class="h-2.5 w-2.5 rounded-full ${live ? 'bg-emerald-400 shadow-[0_0_9px_rgba(52,211,153,0.75)]' : 'bg-amber-400 animate-pulse'}">
+            </span>
+
+            <span class="hidden text-[11px] font-bold text-slate-200 sm:inline">
+              ${live ? 'متصل' : 'غير متصل'}
+            </span>
+
+          </div>
 
           ${actions}
 
         </div>
       </header>
 
-      <main class="px-4 pt-5">
+      <!-- محتوى الصفحة -->
+      <main class="mx-auto w-full px-3 pt-5 sm:px-6 sm:pt-7">
         ${body}
       </main>
+
+      <footer class="mx-auto mt-10 max-w-5xl px-4 pb-5 text-center text-[11px] font-medium text-slate-400">
+        نظام حسابات المقاولين
+      </footer>
 
     </div>`
   }
@@ -192,23 +221,29 @@ const UI = (() => {
     root().innerHTML = `
       <div
         id="modal-backdrop"
-        class="fixed inset-0 z-50 flex items-end justify-center bg-gray-950/60 p-0 backdrop-blur-[2px] sm:items-center sm:p-4">
+        class="fixed inset-0 z-50 flex items-end justify-center bg-[#071226]/65 p-0 backdrop-blur-[4px] sm:items-center sm:p-4">
 
         <div
-          class="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-gray-100 bg-white p-5 pb-7 shadow-2xl sm:rounded-3xl"
+          class="relative max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-t-[28px] border border-slate-200 bg-white p-5 pb-8 shadow-[0_25px_80px_rgba(0,0,0,0.25)] sm:rounded-3xl sm:p-7"
           role="dialog"
           aria-modal="true">
 
-          <div class="mb-5 flex items-center justify-between border-b border-gray-100 pb-4">
+          <div class="sticky top-0 z-10 -mx-5 -mt-5 mb-6 flex items-center justify-between border-b border-slate-100 bg-white/95 px-5 pb-4 pt-5 backdrop-blur sm:-mx-7 sm:-mt-7 sm:px-7 sm:pt-7">
 
-            <h3 class="text-lg font-extrabold text-gray-900">
-              ${title}
-            </h3>
+            <div class="flex min-w-0 items-center gap-3">
+
+              <div class="h-8 w-1 shrink-0 rounded-full bg-brand"></div>
+
+              <h3 class="truncate text-lg font-extrabold text-[#101c35]">
+                ${title}
+              </h3>
+
+            </div>
 
             <button
               data-a="modal-close"
               aria-label="إغلاق"
-              class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-lg text-gray-500 transition hover:bg-red-50 hover:text-red-600 active:scale-95">
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-lg text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95">
               ✕
             </button>
 
@@ -235,13 +270,13 @@ const UI = (() => {
     r.innerHTML = `
       <div
         role="status"
-        class="fixed bottom-6 left-1/2 z-[60] flex max-w-[90%] -translate-x-1/2 items-center gap-3 rounded-2xl px-5 py-4 text-center text-sm font-bold text-white shadow-xl ${
+        class="fixed bottom-5 left-1/2 z-[60] flex max-w-[92%] -translate-x-1/2 items-center gap-3 rounded-2xl border px-5 py-4 text-center text-sm font-extrabold text-white shadow-[0_12px_35px_rgba(0,0,0,0.2)] ${
           type === 'err'
-            ? 'bg-red-600'
-            : 'bg-green-600'
+            ? 'border-red-500 bg-[#b92e43]'
+            : 'border-emerald-500 bg-[#087d60]'
         }">
 
-        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/15 text-base">
           ${type === 'err' ? '!' : '✓'}
         </span>
 
