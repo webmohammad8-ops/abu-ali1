@@ -1,22 +1,36 @@
 
-// الصفحة الرئيسية - تصميم جديد
+/* الصفحة الرئيسية - تصميم البطاقات الحديثة */
 ;(() => {
-  const { esc, card, btn, field, inputCls, empty, layout } = UI
+  const { esc, btn, field, inputCls, empty, layout } = UI
   const { fmt, showDate, toNum } = Calc
 
   const GROUPS = ['طوبار', 'حداد', 'طراش', 'عامل']
 
-  // بطاقة إحصائية
-  const stat = (icon, label, value, sub, color) => `
-    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-      <div class="flex items-center justify-between gap-2">
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl ${color} text-xl">
+  // بطاقة إحصائية حديثة
+  const stat = (icon, label, value, sub, color, iconColor) => `
+    <div class="relative overflow-hidden rounded-2xl border border-gray-100 ${color} p-4 shadow-sm transition active:scale-[0.98]">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/80 text-2xl shadow-sm">
           ${icon}
         </div>
-        <span class="text-2xl font-extrabold text-gray-900">${value}</span>
+        <span class="text-2xl font-extrabold ${iconColor} text-left">
+          ${value}
+        </span>
       </div>
-      <div class="mt-3 text-sm font-extrabold text-gray-800">${label}</div>
-      ${sub ? `<div class="mt-1 text-xs text-gray-400">${sub}</div>` : ''}
+
+      <div class="mt-4 text-sm font-extrabold text-gray-800">
+        ${label}
+      </div>
+
+      ${sub ? `
+        <div class="mt-1 text-xs font-medium text-gray-500">
+          ${sub}
+        </div>
+      ` : ''}
+
+      <div class="pointer-events-none absolute -bottom-5 -left-3 text-6xl opacity-[0.06]">
+        ${icon}
+      </div>
     </div>
   `
 
@@ -27,7 +41,11 @@
         <h2 class="text-lg font-extrabold text-gray-900">${title}</h2>
         ${subtitle ? `<p class="mt-1 text-xs text-gray-400">${subtitle}</p>` : ''}
       </div>
-      ${icon ? `<span class="text-xl">${icon}</span>` : ''}
+      ${icon ? `
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-xl">
+          ${icon}
+        </div>
+      ` : ''}
     </div>
   `
 
@@ -57,15 +75,15 @@
       .sort((a, b) => b.created_at.localeCompare(a.created_at))
       .slice(0, 5)
 
-    // المشاريع
+    // بطاقات المشاريع
     const projectsHtml = projects.length
       ? `<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           ${projects.map((p) => `
             <a href="#/p/${esc(p.id)}"
-              class="group block rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition active:scale-[0.99]">
+              class="group block overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md active:scale-[0.99]">
 
               <div class="flex items-center gap-3">
-                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-2xl">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-2xl">
                   🏗️
                 </div>
 
@@ -73,17 +91,23 @@
                   <div class="truncate text-base font-extrabold text-gray-900">
                     ${esc(p.name)}
                   </div>
+
                   <div class="mt-1 truncate text-xs text-gray-500">
                     📍 ${esc(p.location || 'بدون موقع')}
                   </div>
                 </div>
 
-                <span class="text-gray-400 transition group-hover:text-blue-600">←</span>
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition group-hover:bg-blue-50 group-hover:text-blue-600">
+                  ←
+                </div>
               </div>
 
               <div class="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-                <span class="text-xs font-bold text-gray-500">عدد العمال</span>
-                <span class="rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-extrabold text-blue-700">
+                <span class="text-xs font-bold text-gray-500">
+                  👷 عدد العمال
+                </span>
+
+                <span class="rounded-xl bg-blue-50 px-3 py-1.5 text-sm font-extrabold text-blue-700">
                   ${count[p.id] || 0} عامل
                 </span>
               </div>
@@ -101,18 +125,19 @@
       ? `<div class="space-y-2">
           ${last.map((i) => `
             <a href="#/p/${esc(i.project_id)}?tab=invoices"
-              class="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition active:bg-gray-50">
+              class="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm transition hover:border-blue-100 active:bg-gray-50">
 
               ${i.image_url
                 ? `<img src="${esc(i.image_url)}" alt="فاتورة"
                     loading="lazy"
                     class="h-14 w-14 shrink-0 rounded-xl bg-gray-100 object-cover">`
-                : `<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-2xl">🧾</div>`}
+                : `<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-2xl">🧾</div>`}
 
               <div class="min-w-0 flex-1">
                 <div class="truncate text-sm font-extrabold text-gray-900">
                   ${esc(nameOf(i.project_id))}
                 </div>
+
                 <div class="mt-1 truncate text-xs text-gray-500">
                   ${esc(i.notes || 'بدون ملاحظة')}
                 </div>
@@ -122,6 +147,7 @@
                 <div class="font-extrabold text-gray-900">
                   ${fmt(i.amount)} ₪
                 </div>
+
                 <div class="mt-1 text-xs text-gray-400">
                   ${showDate(i.created_at.slice(0, 10))}
                 </div>
@@ -141,18 +167,18 @@
 
       body: `
         <!-- رأس الصفحة -->
-        <div class="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-l from-blue-800 to-blue-600 p-5 text-white shadow-lg">
+        <div class="relative mb-6 overflow-hidden rounded-3xl bg-gradient-to-l from-blue-900 via-blue-800 to-blue-600 p-5 text-white shadow-lg">
+
           <div class="relative z-10">
-            <div class="flex items-center gap-2 text-sm font-bold text-blue-100">
-              <span>🏗️</span>
-              المقاول أبو علي
+            <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold text-blue-50">
+              🏗️ المقاول أبو علي
             </div>
 
-            <h2 class="mt-3 text-2xl font-extrabold">
+            <h2 class="mt-4 text-2xl font-extrabold">
               أهلاً بك في لوحة التحكم
             </h2>
 
-            <p class="mt-2 text-sm text-blue-100">
+            <p class="mt-2 text-sm leading-6 text-blue-100">
               تابع مشاريعك وحسابات العمال من مكان واحد
             </p>
 
@@ -162,71 +188,68 @@
             </div>
           </div>
 
-          <div class="pointer-events-none absolute -bottom-12 -left-8 text-9xl opacity-10">
+          <div class="pointer-events-none absolute -bottom-10 -left-5 text-9xl opacity-[0.10]">
             🏗️
           </div>
+
+          <div class="pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full border-[18px] border-white/5"></div>
         </div>
 
         <!-- الإحصائيات -->
         ${sectionTitle('ملخص الحسابات', 'نظرة عامة على بيانات النظام', '📊')}
 
         <div class="grid grid-cols-2 gap-3">
-          ${stat('🏗️', 'إجمالي المشاريع', projects.length, 'المشاريع المسجلة', 'bg-blue-50')}
-          ${stat('👷', 'إجمالي العمال', workers.length, 'جميع العمال', 'bg-indigo-50')}
-          ${stat('💰', 'مصروف الشهر', fmt(wages + inv) + ' ₪', 'أجور وفواتير', 'bg-emerald-50')}
-          ${stat('🧾', 'عدد الفواتير', invoices.length, 'الفواتير المسجلة', 'bg-orange-50')}
+          ${stat('🏗️', 'إجمالي المشاريع', projects.length, 'المشاريع المسجلة', 'bg-blue-50', 'text-blue-800')}
+
+          ${stat('👷', 'إجمالي العمال', workers.length, 'جميع العمال', 'bg-emerald-50', 'text-emerald-800')}
+
+          ${stat('💰', 'مصروف الشهر', fmt(wages + inv) + ' ₪', 'أجور وفواتير', 'bg-orange-50', 'text-orange-800')}
+
+          ${stat('🧾', 'عدد الفواتير', invoices.length, 'الفواتير المسجلة', 'bg-purple-50', 'text-purple-800')}
         </div>
 
         <!-- الإجراءات السريعة -->
         <div class="mt-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+
           ${sectionTitle('إجراءات سريعة', 'الوصول إلى أهم أدوات النظام', '⚡')}
 
           <div class="grid grid-cols-2 gap-3">
+
             <button data-a="addProject"
-              class="flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-xl border border-blue-100 bg-blue-50 p-3 text-center transition active:scale-[0.98]">
-              <span class="text-2xl">➕</span>
-              <span class="text-sm font-extrabold text-blue-800">إضافة مشروع</span>
+              class="flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 p-3 text-center transition hover:bg-blue-100 active:scale-[0.98]">
+              <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-2xl shadow-sm">
+                ➕
+              </span>
+              <span class="text-sm font-extrabold text-blue-800">
+                إضافة مشروع
+              </span>
             </button>
 
             <button data-a="openDailyRates"
-              class="flex min-h-[88px] flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3 text-center transition active:scale-[0.98]">
-              <span class="text-2xl">⚙️</span>
-              <span class="text-sm font-extrabold text-gray-700">إعدادات اليوميات</span>
+              class="flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 p-3 text-center transition hover:bg-gray-100 active:scale-[0.98]">
+              <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-2xl shadow-sm">
+                ⚙️
+              </span>
+              <span class="text-sm font-extrabold text-gray-700">
+                إعدادات اليوميات
+              </span>
             </button>
+
           </div>
         </div>
 
         <!-- المشاريع -->
-        <div class="mt-6">
+        <div class="mt-7">
           ${sectionTitle('المشاريع', 'اختر المشروع لإدارة العمال والحسابات', '🏗️')}
 
           ${projectsHtml}
         </div>
 
         <!-- الفواتير -->
-        <div class="mt-6">
+        <div class="mt-7">
           ${sectionTitle('آخر الفواتير', 'أحدث 5 فواتير مسجلة في النظام', '🧾')}
 
           ${invoicesHtml}
-        </div>
-
-        <!-- إعدادات إضافية -->
-        <div class="mt-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-          <div class="flex items-center gap-3">
-            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-xl">
-              ⚙️
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="font-extrabold text-gray-800">إعدادات النظام</div>
-              <div class="mt-1 text-xs text-gray-500">
-                تعديل اليوميات الافتراضية للمجموعات
-              </div>
-            </div>
-            <button data-a="openDailyRates"
-              class="rounded-xl bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700 active:bg-gray-200">
-              فتح
-            </button>
-          </div>
         </div>
       `
     })
@@ -281,7 +304,7 @@
     })
   }
 
-  // فتح نموذج إضافة يوم عمل جماعي - محفوظ كما هو
+  // فتح نموذج إضافة يوم عمل جماعي
   Actions.openBulkEntry = () => {
     const projects = Store.get().projects
 
