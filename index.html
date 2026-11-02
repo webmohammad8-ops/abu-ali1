@@ -1,28 +1,30 @@
+
 <!doctype html>
 <html lang="ar" dir="rtl">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#2563eb" />
+  <meta name="theme-color" content="#101c35" />
 
-  <title>نظام حسابات المقاولين</title>
+  <title>نظام حسابات المقاولين | المقاول أبو علي</title>
 
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-
   <meta name="apple-mobile-web-app-capable" content="yes" />
+
+  <meta name="description" content="نظام حسابات المقاولين لإدارة المشاريع والعمال والمستحقات والفواتير." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
   <link
-    href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet"
   />
 
-  <!-- Tailwind (بدون بناء) -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com/3.4.16"></script>
 
   <script>
@@ -34,10 +36,20 @@
           },
           colors: {
             brand: {
-              DEFAULT: '#2563eb',
-              dark: '#1d4ed8',
-              light: '#eff6ff'
-            }
+              DEFAULT: '#315ee8',
+              dark: '#2448bd',
+              light: '#edf2ff'
+            },
+            navy: {
+              DEFAULT: '#101c35',
+              dark: '#0a1428',
+              light: '#1c2d4d'
+            },
+            surface: '#f3f6fb'
+          },
+          boxShadow: {
+            premium: '0 12px 35px rgba(16, 28, 53, 0.07)',
+            elevated: '0 20px 55px rgba(16, 28, 53, 0.12)'
           }
         }
       }
@@ -45,17 +57,40 @@
   </script>
 
   <style>
+    :root {
+      --navy: #101c35;
+      --navy-dark: #0a1428;
+      --navy-light: #1c2d4d;
+      --brand: #315ee8;
+      --brand-dark: #2448bd;
+      --brand-light: #edf2ff;
+      --page: #f3f6fb;
+      --surface: #ffffff;
+      --text: #17233b;
+      --muted: #7b879b;
+      --border: #e7ecf4;
+      --success: #0d9870;
+      --danger: #dc4657;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     html,
     body {
       min-height: 100%;
+      scroll-behavior: smooth;
     }
 
     body {
-      background: #f9fafb;
-      color: #111827;
+      margin: 0;
+      background: var(--page);
+      color: var(--text);
       font-family: Tajawal, Tahoma, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
       padding-bottom: env(safe-area-inset-bottom);
+      text-rendering: optimizeLegibility;
     }
 
     input,
@@ -64,88 +99,338 @@
     button {
       font-family: inherit;
     }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    ::selection {
+      background: #dbe6ff;
+      color: var(--navy);
+    }
+
+    *:focus-visible {
+      outline: 3px solid rgba(49, 94, 232, 0.22);
+      outline-offset: 2px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd4e3;
+      border-radius: 20px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9eacc2;
+    }
+
+    /* تحسين الانتقالات العامة */
+    button,
+    a,
+    input,
+    select,
+    textarea {
+      transition:
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
     /* شاشة تسجيل الدخول */
-#password-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 999999;
-  background: #f9fafb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
+    #password-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 22px;
+      background:
+        radial-gradient(ellipse at 15% 15%, rgba(49, 94, 232, 0.17), transparent 38%),
+        radial-gradient(ellipse at 90% 90%, rgba(30, 74, 157, 0.17), transparent 40%),
+        linear-gradient(145deg, #f7f9fd 0%, #edf2fa 100%);
+    }
 
-.password-box {
-  width: 100%;
-  max-width: 380px;
-  background: white;
-  padding: 30px;
-  border-radius: 18px;
-  box-shadow: 0 10px 35px rgba(0,0,0,0.08);
-  text-align: center;
-}
+    #password-screen::before {
+      content: "";
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      border: 1px solid rgba(49, 94, 232, 0.09);
+      border-radius: 50%;
+      top: -190px;
+      right: -130px;
+      pointer-events: none;
+    }
 
-.password-box input {
-  width: 100%;
-  padding: 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  margin: 20px 0 12px;
-  font-size: 17px;
-  text-align: center;
-  outline: none;
-}
+    #password-screen::after {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border: 1px solid rgba(49, 94, 232, 0.08);
+      border-radius: 50%;
+      bottom: -160px;
+      left: -100px;
+      pointer-events: none;
+    }
 
-.password-box button {
-  width: 100%;
-  padding: 14px;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 17px;
-  font-weight: bold;
-  cursor: pointer;
-}
+    .password-box {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 410px;
+      padding: 38px 30px 30px;
+      overflow: hidden;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 25px;
+      box-shadow:
+        0 25px 70px rgba(16, 28, 53, 0.11),
+        0 4px 14px rgba(16, 28, 53, 0.04);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
 
-#password-error {
-  color: #dc2626;
-  font-size: 14px;
-  margin-top: 12px;
-}
+    .password-box::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #2448bd, #4778ff, #8aaaff);
+    }
+
+    .password-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 21px;
+      color: white;
+      background: linear-gradient(145deg, #315ee8, #173a9f);
+      border-radius: 23px;
+      box-shadow: 0 12px 25px rgba(49, 94, 232, 0.25);
+    }
+
+    .password-logo svg {
+      width: 39px;
+      height: 39px;
+    }
+
+    .password-box h2 {
+      margin: 0;
+      color: var(--navy);
+      font-size: 27px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    .password-subtitle {
+      margin: 9px 0 27px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .password-label {
+      display: block;
+      margin-bottom: 9px;
+      color: #42516a;
+      text-align: right;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .password-box input {
+      display: block;
+      width: 100%;
+      height: 53px;
+      margin: 0 0 14px;
+      padding: 0 16px;
+      color: var(--navy);
+      background: #f7f9fd;
+      border: 1px solid #e1e7f1;
+      border-radius: 13px;
+      outline: none;
+      font-size: 17px;
+      text-align: center;
+      letter-spacing: 3px;
+    }
+
+    .password-box input::placeholder {
+      color: #a4afc0;
+      letter-spacing: 0;
+      font-size: 14px;
+    }
+
+    .password-box input:focus {
+      background: white;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px rgba(49, 94, 232, 0.09);
+    }
+
+    .password-box button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 53px;
+      padding: 13px 18px;
+      color: white;
+      background: linear-gradient(135deg, #315ee8, #2448bd);
+      border: 0;
+      border-radius: 13px;
+      box-shadow: 0 8px 20px rgba(49, 94, 232, 0.22);
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .password-box button:hover {
+      background: linear-gradient(135deg, #244fda, #1b3d9e);
+      box-shadow: 0 11px 25px rgba(49, 94, 232, 0.3);
+    }
+
+    #password-error {
+      min-height: 20px;
+      margin-top: 13px;
+      color: var(--danger);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .password-footer {
+      margin-top: 25px;
+      padding-top: 17px;
+      color: #9aa5b7;
+      border-top: 1px solid #edf0f5;
+      font-size: 12px;
+    }
+
+    /* حاوية التطبيق */
+    #app {
+      min-height: 100vh;
+    }
+
+    #modal-root,
+    #toast-root {
+      position: relative;
+      z-index: 1000;
+    }
+
+    @media (max-width: 480px) {
+      .password-box {
+        padding: 32px 22px 24px;
+        border-radius: 22px;
+      }
+
+      .password-logo {
+        width: 68px;
+        height: 68px;
+        border-radius: 20px;
+      }
+
+      .password-box h2 {
+        font-size: 24px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 
 <body>
-<div id="password-screen">
-  <div class="password-box">
-    <h2 style="font-size:25px;font-weight:800;color:#111827">
-      المقاول أبو علي
-    </h2>
 
-    <p style="color:#6b7280;margin-top:8px">
-      أدخل كلمة المرور للدخول إلى النظام
-    </p>
+  <!-- شاشة تسجيل الدخول -->
+  <div id="password-screen">
+    <div class="password-box">
 
-    <form id="password-form">
-      <input
-        type="password"
-        id="site-password"
-        placeholder="كلمة المرور"
-        autocomplete="current-password"
-        required
-      />
+      <div class="password-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 21h18" />
+          <path d="M5 21V7l8-4v18" />
+          <path d="M19 21V11l-6-4" />
+          <path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01" />
+          <path d="M16 13v.01M16 16v.01M16 19v.01" />
+        </svg>
+      </div>
 
-      <button type="submit">دخول إلى النظام</button>
-    </form>
+      <h2>المقاول أبو علي</h2>
 
-    <div id="password-error"></div>
+      <p class="password-subtitle">
+        نظام إدارة حسابات المقاولين والعمال
+        <br />
+        أدخل كلمة المرور للمتابعة
+      </p>
+
+      <form id="password-form">
+
+        <label class="password-label" for="site-password">
+          كلمة المرور
+        </label>
+
+        <input
+          type="password"
+          id="site-password"
+          placeholder="أدخل كلمة المرور"
+          autocomplete="current-password"
+          required
+        />
+
+        <button type="submit">
+          <span>دخول إلى النظام</span>
+          <svg width="19" height="19" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </button>
+
+      </form>
+
+      <div id="password-error"></div>
+
+      <div class="password-footer">
+        نظام حسابات المقاولين
+      </div>
+
+    </div>
   </div>
-</div>
+
+  <!-- التطبيق -->
   <div id="app">
-    <div style="padding:80px 0;text-align:center;color:#6b7280">
-      جارٍ التحميل…
+    <div style="padding:80px 0;text-align:center;color:#7b879b">
+      جارٍ تحميل النظام…
     </div>
   </div>
 
@@ -156,11 +441,10 @@
     يلزم تفعيل JavaScript لتشغيل التطبيق.
   </noscript>
 
-
-  <!-- Supabase (UMD، بدون بناء) -->
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.46.1/dist/umd/supabase.js"></script>
 
-  <!-- ملفات النظام -->
+  <!-- ملفات النظام - حافظنا على ترتيب التحميل -->
   <script src="config.js"></script>
   <script src="calc.js"></script>
   <script src="store.js"></script>
@@ -173,28 +457,31 @@
   <script src="archive.js"></script>
   <script src="app.js"></script>
   <script src="print.js"></script>
-<script>
-(function () {
-  const PASSWORD = '12345678'; // غيّر كلمة المرور من هنا
 
-  const screen = document.getElementById('password-screen');
-  const form = document.getElementById('password-form');
-  const input = document.getElementById('site-password');
-  const error = document.getElementById('password-error');
+  <!-- تسجيل الدخول - نفس كلمة المرور والوظيفة السابقة -->
+  <script>
+    (function () {
+      const PASSWORD = '12345678';
 
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
+      const screen = document.getElementById('password-screen');
+      const form = document.getElementById('password-form');
+      const input = document.getElementById('site-password');
+      const error = document.getElementById('password-error');
 
-    if (input.value === PASSWORD) {
-      screen.style.display = 'none';
-      input.value = '';
-    } else {
-      error.textContent = 'كلمة المرور غير صحيحة';
-      input.value = '';
-      input.focus();
-    }
-  });
-})();
-</script>
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        if (input.value === PASSWORD) {
+          screen.style.display = 'none';
+          input.value = '';
+        } else {
+          error.textContent = 'كلمة المرور غير صحيحة';
+          input.value = '';
+          input.focus();
+        }
+      });
+    })();
+  </script>
+
 </body>
 </html>
