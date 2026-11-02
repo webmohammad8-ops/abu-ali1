@@ -1,34 +1,42 @@
 
-/* الصفحة الرئيسية - تصميم البطاقات الحديثة */
+/* الصفحة الرئيسية - لوحة تحكم محاسبية احترافية */
 ;(() => {
   const { esc, btn, field, inputCls, empty, layout } = UI
   const { fmt, showDate, toNum } = Calc
 
   const GROUPS = ['طوبار', 'حداد', 'طراش', 'عامل']
 
-  // بطاقة إحصائية حديثة
+  // بطاقة إحصائية
   const stat = (icon, label, value, sub, color, iconColor) => `
-    <div class="relative overflow-hidden rounded-2xl border border-gray-100 ${color} p-4 shadow-sm transition active:scale-[0.98]">
-      <div class="flex items-start justify-between gap-2">
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/80 text-2xl shadow-sm">
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_3px_14px_rgba(16,28,53,0.04)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(16,28,53,0.08)] sm:rounded-3xl sm:p-5">
+
+      <div class="absolute -bottom-7 -left-5 h-24 w-24 rounded-full ${color} opacity-50"></div>
+
+      <div class="relative flex items-start justify-between gap-2">
+
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${color} text-2xl transition-transform duration-200 group-hover:scale-110">
           ${icon}
         </div>
-        <span class="text-2xl font-extrabold ${iconColor} text-left">
+
+        <span class="max-w-[70%] break-words text-left text-xl font-black tracking-tight text-[#101c35] sm:text-2xl">
           ${value}
         </span>
+
       </div>
 
-      <div class="mt-4 text-sm font-extrabold text-gray-800">
-        ${label}
-      </div>
-
-      ${sub ? `
-        <div class="mt-1 text-xs font-medium text-gray-500">
-          ${sub}
+      <div class="relative mt-5">
+        <div class="text-sm font-extrabold text-slate-700">
+          ${label}
         </div>
-      ` : ''}
 
-      <div class="pointer-events-none absolute -bottom-5 -left-3 text-6xl opacity-[0.06]">
+        ${sub ? `
+          <div class="mt-1.5 text-xs font-medium text-slate-400">
+            ${sub}
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="pointer-events-none absolute bottom-2 left-3 text-5xl opacity-[0.045]">
         ${icon}
       </div>
     </div>
@@ -36,16 +44,26 @@
 
   // عنوان القسم
   const sectionTitle = (title, subtitle, icon) => `
-    <div class="mb-3 flex items-center justify-between gap-2">
-      <div>
-        <h2 class="text-lg font-extrabold text-gray-900">${title}</h2>
-        ${subtitle ? `<p class="mt-1 text-xs text-gray-400">${subtitle}</p>` : ''}
+    <div class="mb-4 flex items-center justify-between gap-3">
+
+      <div class="min-w-0">
+        <h2 class="text-lg font-black tracking-tight text-[#101c35] sm:text-xl">
+          ${title}
+        </h2>
+
+        ${subtitle ? `
+          <p class="mt-1 text-xs font-medium leading-5 text-slate-400">
+            ${subtitle}
+          </p>
+        ` : ''}
       </div>
+
       ${icon ? `
-        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-xl">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-xl shadow-sm">
           ${icon}
         </div>
       ` : ''}
+
     </div>
   `
 
@@ -80,85 +98,96 @@
       ? `<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           ${projects.map((p) => `
             <a href="#/p/${esc(p.id)}"
-              class="group block overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md active:scale-[0.99]">
+              class="group relative block overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_3px_14px_rgba(16,28,53,0.035)] transition-all duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_12px_28px_rgba(16,28,53,0.08)] sm:rounded-3xl sm:p-5">
 
-              <div class="flex items-center gap-3">
-                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-2xl">
+              <div class="absolute -left-8 -top-10 h-28 w-28 rounded-full bg-blue-50/70 transition-transform duration-300 group-hover:scale-125"></div>
+
+              <div class="relative flex items-center gap-3">
+
+                <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-100 text-2xl shadow-sm">
                   🏗️
                 </div>
 
                 <div class="min-w-0 flex-1">
-                  <div class="truncate text-base font-extrabold text-gray-900">
+                  <div class="truncate text-base font-black text-[#101c35]">
                     ${esc(p.name)}
                   </div>
 
-                  <div class="mt-1 truncate text-xs text-gray-500">
-                    📍 ${esc(p.location || 'بدون موقع')}
+                  <div class="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs font-medium text-slate-400">
+                    <span>📍</span>
+                    <span class="truncate">${esc(p.location || 'بدون موقع')}</span>
                   </div>
                 </div>
 
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition group-hover:bg-blue-50 group-hover:text-blue-600">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-lg text-slate-400 transition-all group-hover:bg-brand group-hover:text-white">
                   ←
                 </div>
+
               </div>
 
-              <div class="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-                <span class="text-xs font-bold text-gray-500">
-                  👷 عدد العمال
-                </span>
+              <div class="relative mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
 
-                <span class="rounded-xl bg-blue-50 px-3 py-1.5 text-sm font-extrabold text-blue-700">
+                <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+                  <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">👷</span>
+                  عدد العمال
+                </div>
+
+                <span class="rounded-xl border border-blue-100 bg-blue-50 px-3.5 py-2 text-sm font-black text-blue-700">
                   ${count[p.id] || 0} عامل
                 </span>
+
               </div>
+
             </a>
           `).join('')}
         </div>`
       : empty({
           icon: '🏗️',
           title: 'لا توجد مشاريع بعد',
-          hint: 'ابدأ بإضافة أول مشروع'
+          hint: 'ابدأ بإضافة أول مشروع لتتمكن من إدارة العمال والحسابات.',
+          action: btn('إضافة أول مشروع', { a: 'addProject' })
         })
 
     // آخر الفواتير
     const invoicesHtml = last.length
-      ? `<div class="space-y-2">
+      ? `<div class="space-y-3">
           ${last.map((i) => `
             <a href="#/p/${esc(i.project_id)}?tab=invoices"
-              class="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm transition hover:border-blue-100 active:bg-gray-50">
+              class="group flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_2px_10px_rgba(16,28,53,0.025)] transition-all hover:border-blue-200 hover:shadow-md active:scale-[0.99] sm:p-4">
 
               ${i.image_url
                 ? `<img src="${esc(i.image_url)}" alt="فاتورة"
                     loading="lazy"
-                    class="h-14 w-14 shrink-0 rounded-xl bg-gray-100 object-cover">`
-                : `<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-2xl">🧾</div>`}
+                    class="h-14 w-14 shrink-0 rounded-xl border border-slate-100 bg-slate-100 object-cover">`
+                : `<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-orange-100 bg-orange-50 text-2xl">🧾</div>`}
 
               <div class="min-w-0 flex-1">
-                <div class="truncate text-sm font-extrabold text-gray-900">
+                <div class="truncate text-sm font-extrabold text-[#101c35] transition-colors group-hover:text-brand">
                   ${esc(nameOf(i.project_id))}
                 </div>
 
-                <div class="mt-1 truncate text-xs text-gray-500">
+                <div class="mt-1.5 truncate text-xs font-medium text-slate-400">
                   ${esc(i.notes || 'بدون ملاحظة')}
                 </div>
               </div>
 
               <div class="shrink-0 text-left">
-                <div class="font-extrabold text-gray-900">
+                <div class="font-black text-[#101c35]">
                   ${fmt(i.amount)} ₪
                 </div>
 
-                <div class="mt-1 text-xs text-gray-400">
+                <div class="mt-1.5 text-[11px] font-medium text-slate-400">
                   ${showDate(i.created_at.slice(0, 10))}
                 </div>
               </div>
+
             </a>
           `).join('')}
         </div>`
       : empty({
           icon: '🧾',
           title: 'لا توجد فواتير مرفوعة',
-          hint: 'يمكنك رفع الفواتير من داخل المشروع'
+          hint: 'يمكنك رفع الفواتير وتوثيق المصاريف من داخل كل مشروع.'
         })
 
     return layout({
@@ -166,91 +195,151 @@
       subtitle: 'نظام حسابات المقاولين',
 
       body: `
-        <!-- رأس الصفحة -->
-        <div class="relative mb-6 overflow-hidden rounded-3xl bg-gradient-to-l from-blue-900 via-blue-800 to-blue-600 p-5 text-white shadow-lg">
+        <!-- واجهة الترحيب -->
+        <div class="relative mb-7 overflow-hidden rounded-3xl border border-[#263b61] bg-[#101c35] p-5 text-white shadow-[0_14px_35px_rgba(16,28,53,0.16)] sm:p-7">
+
+          <div class="pointer-events-none absolute -left-12 -top-16 h-52 w-52 rounded-full border-[24px] border-white/[0.035]"></div>
+          <div class="pointer-events-none absolute -left-5 -top-9 h-36 w-36 rounded-full border border-white/[0.06]"></div>
+          <div class="pointer-events-none absolute -bottom-16 right-1/3 h-48 w-48 rounded-full bg-blue-500/10 blur-2xl"></div>
 
           <div class="relative z-10">
-            <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold text-blue-50">
-              🏗️ المقاول أبو علي
+
+            <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-bold text-blue-100">
+              <span class="h-2 w-2 rounded-full bg-blue-400"></span>
+              المقاول أبو علي
             </div>
 
-            <h2 class="mt-4 text-2xl font-extrabold">
+            <h2 class="mt-5 text-2xl font-black leading-tight tracking-tight sm:text-3xl">
               أهلاً بك في لوحة التحكم
             </h2>
 
-            <p class="mt-2 text-sm leading-6 text-blue-100">
-              تابع مشاريعك وحسابات العمال من مكان واحد
+            <p class="mt-3 max-w-md text-sm leading-7 text-slate-300">
+              كل مشاريعك وحسابات العمال وفواتيرك في مكان واحد، بإدارة أسهل ورؤية أوضح.
             </p>
 
-            <div class="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-xs font-bold">
-              <span class="h-2 w-2 rounded-full bg-green-400"></span>
-              النظام جاهز للعمل
+            <div class="mt-6 flex flex-wrap items-center gap-3">
+
+              <div class="inline-flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-xs font-bold text-emerald-300">
+                <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                النظام جاهز للعمل
+              </div>
+
+              <div class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-bold text-slate-300">
+                <span>📊</span>
+                إدارة مالية متكاملة
+              </div>
+
             </div>
+
           </div>
 
-          <div class="pointer-events-none absolute -bottom-10 -left-5 text-9xl opacity-[0.10]">
+          <div class="pointer-events-none absolute bottom-3 left-5 text-8xl opacity-[0.09] sm:text-9xl">
             🏗️
           </div>
 
-          <div class="pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full border-[18px] border-white/5"></div>
         </div>
 
         <!-- الإحصائيات -->
-        ${sectionTitle('ملخص الحسابات', 'نظرة عامة على بيانات النظام', '📊')}
+        <section class="mb-7">
 
-        <div class="grid grid-cols-2 gap-3">
-          ${stat('🏗️', 'إجمالي المشاريع', projects.length, 'المشاريع المسجلة', 'bg-blue-50', 'text-blue-800')}
+          ${sectionTitle('ملخص الحسابات', 'نظرة عامة على بيانات النظام', '📊')}
 
-          ${stat('👷', 'إجمالي العمال', workers.length, 'جميع العمال', 'bg-emerald-50', 'text-emerald-800')}
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
 
-          ${stat('💰', 'مصروف الشهر', fmt(wages + inv) + ' ₪', 'أجور وفواتير', 'bg-orange-50', 'text-orange-800')}
+            ${stat(
+              '🏗️',
+              'إجمالي المشاريع',
+              projects.length,
+              'المشاريع المسجلة',
+              'bg-blue-50',
+              'text-blue-700'
+            )}
 
-          ${stat('🧾', 'عدد الفواتير', invoices.length, 'الفواتير المسجلة', 'bg-purple-50', 'text-purple-800')}
-        </div>
+            ${stat(
+              '👷',
+              'إجمالي العمال',
+              workers.length,
+              'جميع العمال',
+              'bg-emerald-50',
+              'text-emerald-700'
+            )}
+
+            ${stat(
+              '💰',
+              'مصروف الشهر',
+              fmt(wages + inv) + ' ₪',
+              'أجور وفواتير',
+              'bg-amber-50',
+              'text-amber-700'
+            )}
+
+            ${stat(
+              '🧾',
+              'عدد الفواتير',
+              invoices.length,
+              'الفواتير المسجلة',
+              'bg-violet-50',
+              'text-violet-700'
+            )}
+
+          </div>
+
+        </section>
 
         <!-- الإجراءات السريعة -->
-        <div class="mt-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+        <section class="mb-8 overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_3px_14px_rgba(16,28,53,0.035)] sm:p-5">
 
           ${sectionTitle('إجراءات سريعة', 'الوصول إلى أهم أدوات النظام', '⚡')}
 
           <div class="grid grid-cols-2 gap-3">
 
             <button data-a="addProject"
-              class="flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 p-3 text-center transition hover:bg-blue-100 active:scale-[0.98]">
-              <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-2xl shadow-sm">
+              class="group flex min-h-[112px] flex-col items-center justify-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/70 p-3 text-center transition-all hover:border-blue-200 hover:bg-blue-50 active:scale-[0.98]">
+
+              <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm transition-transform group-hover:scale-110">
                 ➕
               </span>
+
               <span class="text-sm font-extrabold text-blue-800">
                 إضافة مشروع
               </span>
+
             </button>
 
             <button data-a="openDailyRates"
-              class="flex min-h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 p-3 text-center transition hover:bg-gray-100 active:scale-[0.98]">
-              <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-2xl shadow-sm">
+              class="group flex min-h-[112px] flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center transition-all hover:border-slate-300 hover:bg-slate-100 active:scale-[0.98]">
+
+              <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm transition-transform group-hover:scale-110">
                 ⚙️
               </span>
-              <span class="text-sm font-extrabold text-gray-700">
+
+              <span class="text-sm font-extrabold text-slate-700">
                 إعدادات اليوميات
               </span>
+
             </button>
 
           </div>
-        </div>
+
+        </section>
 
         <!-- المشاريع -->
-        <div class="mt-7">
+        <section class="mb-8">
+
           ${sectionTitle('المشاريع', 'اختر المشروع لإدارة العمال والحسابات', '🏗️')}
 
           ${projectsHtml}
-        </div>
+
+        </section>
 
         <!-- الفواتير -->
-        <div class="mt-7">
+        <section class="mb-7">
+
           ${sectionTitle('آخر الفواتير', 'أحدث 5 فواتير مسجلة في النظام', '🧾')}
 
           ${invoicesHtml}
-        </div>
+
+        </section>
       `
     })
   }
@@ -264,9 +353,14 @@
     `).join('')
 
     UI.openModal('⚙️ إعدادات اليوميات', `
-      <p class="mb-3 text-sm text-gray-500">
-        حدد اليومية الافتراضية لكل مجموعة. سيتم استخدام هذه الأسعار في جميع المشاريع.
-      </p>
+      <div class="mb-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+        <div class="flex items-start gap-3">
+          <span class="text-xl">💡</span>
+          <p class="text-sm leading-6 text-blue-800">
+            حدد اليومية الافتراضية لكل مجموعة. سيتم استخدام هذه الأسعار عند إضافة العمال وتسجيل يومياتهم.
+          </p>
+        </div>
+      </div>
 
       ${inputs}
 
@@ -373,9 +467,8 @@
         `)}
       </div>
 
-      <p class="mb-3 text-xs text-gray-500">
-        سيتم تسجيل يومية كل عامل تلقائيًا حسب يوميته المحفوظة،
-        وستظهر السجلات داخل ملف كل عامل.
+      <p class="mb-4 rounded-xl bg-slate-50 p-3 text-xs leading-6 text-slate-500">
+        سيتم تسجيل يومية كل عامل تلقائيًا حسب يوميته المحفوظة، وستظهر السجلات داخل ملف كل عامل.
       </p>
 
       <div class="flex gap-2">
@@ -396,11 +489,15 @@
   // إضافة مشروع
   Actions.addProject = () => {
     UI.openModal('مشروع جديد', `
-      ${field('اسم المشروع *', `<input id="pj-name" class="${inputCls}" autocomplete="off">`)}
-      ${field('الموقع', `<input id="pj-loc" class="${inputCls}" autocomplete="off">`)}
+      <div class="mb-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-sm leading-6 text-blue-800">
+        أضف بيانات المشروع للبدء بإدارة العمال والمستحقات والفواتير.
+      </div>
+
+      ${field('اسم المشروع *', `<input id="pj-name" class="${inputCls}" autocomplete="off" placeholder="مثال: مشروع عمارة سكنية">`)}
+      ${field('الموقع', `<input id="pj-loc" class="${inputCls}" autocomplete="off" placeholder="المدينة أو المنطقة">`)}
 
       <div class="flex gap-2">
-        ${btn('حفظ', { a: 'saveProject', cls: 'flex-1' })}
+        ${btn('حفظ المشروع', { a: 'saveProject', cls: 'flex-1' })}
         ${btn('إلغاء', { a: 'modal-close', v: 'secondary', cls: 'flex-1' })}
       </div>
     `,
