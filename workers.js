@@ -1,5 +1,5 @@
 
-// تاب العمال
+// تاب العمال - تصميم حديث
 const WorkersTab = (() => {
   const { esc, card, btn, field, inputCls, empty, balance } = UI
   const { GROUPS, toNum, fmt } = Calc
@@ -23,7 +23,6 @@ const WorkersTab = (() => {
       (by[e.worker_id] = by[e.worker_id] || []).push(e)
     })
 
-    // إضافة المهن الجديدة تلقائيًا إلى الفلاتر
     const customGroups = [...new Set(
       list
         .map((w) => w.group_type)
@@ -41,28 +40,58 @@ const WorkersTab = (() => {
         ? list.length
         : list.filter((w) => w.group_type === g).length
 
-    const chips = allGroups.map((g) =>
-      `<button data-a="workerFilter" data-id="${esc(g)}"
-        class="min-h-[42px] shrink-0 rounded-xl border px-4 text-sm font-bold transition ${
+    const chips = allGroups.map((g) => `
+      <button data-a="workerFilter" data-id="${esc(g)}"
+        class="flex min-h-[44px] shrink-0 items-center gap-2 rounded-xl border px-4 text-sm font-extrabold transition active:scale-[0.97] ${
           S.filter === g
-            ? 'border-brand bg-brand text-white shadow-sm'
-            : 'border-gray-200 bg-white text-gray-600 active:bg-gray-100'
-        }">${esc(g)} <span class="opacity-70">(${count(g)})</span></button>`
-    ).join('')
+            ? 'border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-100'
+            : 'border-gray-200 bg-white text-gray-600 hover:border-blue-200'
+        }">
+        ${esc(g)}
+        <span class="rounded-lg px-2 py-0.5 text-xs ${
+          S.filter === g
+            ? 'bg-white/20 text-white'
+            : 'bg-gray-100 text-gray-500'
+        }">${count(g)}</span>
+      </button>
+    `).join('')
 
     let cards
 
     if (!list.length) {
-      cards = empty({
-        icon: '👷',
-        title: 'لا يوجد عمال في هذا المشروع',
-        hint: 'اضغط «إضافة عامل» للبدء',
-      })
+      cards = `
+        <div class="rounded-3xl border-2 border-dashed border-blue-200 bg-blue-50/50 px-5 py-10 text-center">
+          <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-white text-4xl shadow-sm">
+            👷
+          </div>
+
+          <h3 class="mt-5 text-lg font-extrabold text-gray-900">
+            لا يوجد عمال في هذا المشروع
+          </h3>
+
+          <p class="mt-2 text-sm text-gray-500">
+            ابدأ بإضافة العمال لإدارة يومياتهم وحساباتهم
+          </p>
+
+          <button data-a="addWorker"
+            class="mt-5 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-extrabold text-white shadow-md shadow-blue-100 transition active:scale-[0.97]">
+            <span class="text-xl">＋</span>
+            إضافة أول عامل
+          </button>
+        </div>
+      `
     } else if (!shown.length) {
-      cards = empty({
-        icon: '🔎',
-        title: `لا يوجد عمال في مجموعة «${esc(S.filter)}»`,
-      })
+      cards = `
+        <div class="rounded-2xl border border-gray-100 bg-white px-4 py-8 text-center shadow-sm">
+          <div class="text-3xl">🔎</div>
+          <h3 class="mt-3 font-extrabold text-gray-800">
+            لا يوجد عمال في مجموعة «${esc(S.filter)}»
+          </h3>
+          <p class="mt-1 text-xs text-gray-400">
+            جرّب اختيار مجموعة أخرى
+          </p>
+        </div>
+      `
     } else {
       cards = shown.map((w) => {
         const groupRate = Store.getRate(w.group_type)
@@ -77,94 +106,146 @@ const WorkersTab = (() => {
         const effectiveRate =
           workerRate === null ? groupRate : workerRate
 
-        return card(`
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0 flex-1">
-              <div class="truncate text-lg font-extrabold text-gray-900">
-                ${esc(w.name)}
+        return `
+          <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:shadow-md">
+
+            <!-- اسم العامل والمهنة -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-2xl">
+                  👷
+                </div>
+
+                <div class="min-w-0 flex-1">
+                  <h3 class="truncate text-base font-extrabold text-gray-900">
+                    ${esc(w.name)}
+                  </h3>
+
+                  <div class="mt-1 flex flex-wrap items-center gap-2">
+                    <span class="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
+                      ${esc(w.group_type)}
+                    </span>
+
+                    <span class="text-xs text-gray-400">
+                      🏠 ${esc(w.sukneh_number || 'بدون رقم سكنة')}
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              <div class="mt-2 flex flex-wrap gap-2 text-xs">
-                <span class="rounded-lg bg-gray-100 px-3 py-1.5 font-bold text-gray-600">
-                  🏠 السكنة: ${esc(w.sukneh_number || '—')}
-                </span>
-
-                <span class="rounded-lg bg-brand-light px-3 py-1.5 font-bold text-brand">
-                  👷 ${esc(w.group_type)}
-                </span>
-              </div>
+              <button data-a="editWorker" data-id="${esc(w.id)}"
+                aria-label="تعديل العامل"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-lg text-gray-600 transition hover:bg-blue-50 hover:text-blue-700 active:scale-95">
+                ✎
+              </button>
             </div>
 
-            <button data-a="editWorker" data-id="${esc(w.id)}"
-              aria-label="تعديل العامل"
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-lg text-gray-700 active:bg-gray-200">
-              ✎
-            </button>
-          </div>
+            <!-- اليومية -->
+            <div class="mt-4 flex items-center justify-between rounded-xl bg-gray-50 p-3">
+              <div>
+                <div class="text-xs font-medium text-gray-500">
+                  اليومية
+                </div>
 
-          <div class="mt-4 flex items-center justify-between rounded-xl bg-gray-50 px-3 py-3">
-            <div>
-              <div class="text-xs text-gray-500">اليومية</div>
-              <div class="mt-1 text-base font-extrabold text-gray-900">
-                ${fmt(effectiveRate)} ₪
+                <div class="mt-1 text-lg font-extrabold text-gray-900">
+                  ${fmt(effectiveRate)} ₪
+                </div>
               </div>
-            </div>
 
-            <div class="text-left">
               ${
                 workerRate !== null
-                  ? '<span class="rounded-lg bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700">يومية خاصة</span>'
-                  : '<span class="rounded-lg bg-gray-200 px-2 py-1 text-xs font-bold text-gray-600">يومية المجموعة</span>'
+                  ? `<span class="rounded-lg bg-blue-100 px-2.5 py-1.5 text-xs font-bold text-blue-700">يومية خاصة</span>`
+                  : `<span class="rounded-lg bg-gray-200 px-2.5 py-1.5 text-xs font-bold text-gray-600">يومية المجموعة</span>`
               }
             </div>
-          </div>
 
-          <div class="mt-3 flex items-center justify-between gap-2">
-            <div>
-              <div class="text-xs text-gray-500">إجمالي حسابه</div>
-              <div class="mt-1">
-                ${balance(Calc.total(by[w.id] || []), true)}
+            <!-- الرصيد -->
+            <div class="mt-3 flex items-center justify-between gap-2 rounded-xl border border-emerald-100 bg-emerald-50/60 p-3">
+              <div>
+                <div class="text-xs font-bold text-gray-500">
+                  إجمالي حساب العامل
+                </div>
+                <div class="mt-1">
+                  ${balance(Calc.total(by[w.id] || []), true)}
+                </div>
+              </div>
+
+              <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-lg">
+                💰
               </div>
             </div>
-          </div>
 
-          <div class="mt-4 grid grid-cols-2 gap-2">
-            <button data-a="printWorkerStatement"
-              data-id="${esc(w.id)}"
-              class="flex min-h-[46px] items-center justify-center rounded-xl bg-gray-800 px-2 text-sm font-bold text-white active:bg-gray-700">
-              🖨️ كشف PDF
-            </button>
+            <!-- الإجراءات -->
+            <div class="mt-3 grid grid-cols-2 gap-2">
+              <button data-a="printWorkerStatement"
+                data-id="${esc(w.id)}"
+                class="flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-gray-800 px-2 text-sm font-extrabold text-white transition hover:bg-gray-700 active:scale-[0.98]">
+                🖨️ كشف PDF
+              </button>
 
-            <a href="#/p/${esc(project.id)}/w/${esc(w.id)}"
-              class="flex min-h-[46px] items-center justify-center rounded-xl bg-brand px-2 text-sm font-bold text-white active:opacity-80">
-              📂 أرشيفه ←
-            </a>
+              <a href="#/p/${esc(project.id)}/w/${esc(w.id)}"
+                class="flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-blue-600 px-2 text-sm font-extrabold text-white transition hover:bg-blue-700 active:scale-[0.98]">
+                📂 أرشيفه ←
+              </a>
+            </div>
           </div>
-        `)
+        `
       }).join('<div class="h-3"></div>')
     }
 
     return `
-      <div class="grid grid-cols-2 gap-2">
-        ${btn('＋ إضافة عامل', {
-          a: 'addWorker',
-          size: 'lg',
-          cls: 'min-h-[52px] w-full',
-        })}
+      <!-- أزرار الإضافة -->
+      <div class="grid grid-cols-2 gap-3">
 
-        ${btn('👥 إضافة مجموعة', {
-          a: 'addWorkerGroup',
-          size: 'lg',
-          cls: 'min-h-[52px] w-full',
-          v: 'secondary',
-        })}
+        <button data-a="addWorker"
+          class="flex min-h-[62px] items-center justify-center gap-2 rounded-2xl bg-blue-600 px-2 text-sm font-extrabold text-white shadow-md shadow-blue-100 transition hover:bg-blue-700 active:scale-[0.98]">
+          <span class="text-2xl">＋</span>
+          إضافة عامل
+        </button>
+
+        <button data-a="addWorkerGroup"
+          class="flex min-h-[62px] items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-2 text-sm font-extrabold text-gray-700 shadow-sm transition hover:bg-gray-50 active:scale-[0.98]">
+          <span class="text-2xl">👥</span>
+          إضافة مجموعة
+        </button>
+
       </div>
 
-      <div class="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-2">
-        ${chips}
+      <!-- ملخص عدد العمال -->
+      <div class="mt-5 flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+        <div>
+          <div class="text-xs font-medium text-gray-500">
+            إجمالي عمال المشروع
+          </div>
+          <div class="mt-1 text-xl font-extrabold text-gray-900">
+            ${list.length}
+            <span class="text-sm font-bold text-gray-500">عامل</span>
+          </div>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-2xl">
+          👷
+        </div>
       </div>
 
-      <div class="mt-3">
+      <!-- فلاتر المهن -->
+      <div class="mt-5">
+        <div class="mb-3 flex items-center justify-between">
+          <h3 class="text-sm font-extrabold text-gray-800">
+            تصنيف العمال
+          </h3>
+          <span class="text-xs text-gray-400">
+            ${shown.length} من ${list.length}
+          </span>
+        </div>
+
+        <div class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2">
+          ${chips}
+        </div>
+      </div>
+
+      <!-- قائمة العمال -->
+      <div class="mt-4">
         ${cards}
       </div>
     `
@@ -227,7 +308,7 @@ const WorkersTab = (() => {
           المجموعة / المهنة
         </span>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
           ${radios}
         </div>
       </div>
@@ -496,7 +577,6 @@ const WorkersTab = (() => {
       )
     }
 
-    // المهنة المخصصة تحتاج إلى يومية خاصة
     if (isCustom && wageValue === '') {
       return UI.toast(
         'حدد اليومية الخاصة للعامل صاحب المهنة الأخرى',
